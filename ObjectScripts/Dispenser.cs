@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class Dispenser : MonoBehaviour {
 	public float shootSpeed = 8.5f;
@@ -12,7 +13,8 @@ public class Dispenser : MonoBehaviour {
 	public float aimSide = 0;
 	public float aimSideWindow = .5f;
 
-	[SerializeField] GameObject GameManagerObject;
+	private RoundManager _RoundManager;
+
 	[SerializeField] GameObject PlayerObj;
 	[SerializeField] GameObject bulletPrefab;
 
@@ -20,7 +22,15 @@ public class Dispenser : MonoBehaviour {
 
 	void Start()
 	{
-		GameManagerObject.GetComponent<RoundManager>().Register(this);
+
+	}
+
+
+	[Inject]
+	void Init(RoundManager Manager)
+	{
+		this._RoundManager = Manager;
+		this._RoundManager.Register(this);
 	}
 
 	public void Activate() {
