@@ -27,6 +27,10 @@ public class Dispenser : MonoBehaviour {
 	private RoundManager _RoundManager;
 	private EventSource _EventSource;
 
+	void Start() {
+		Debug.Log("yasldfasdfyasdf");
+	}
+
 
 	[Inject]
 	void Init(RoundManager Manager, EventSource EventSource)
@@ -38,10 +42,11 @@ public class Dispenser : MonoBehaviour {
 		this._RoundManager.Register(this);
 
 		this._EventSource = EventSource;
-		this._EventSource.StartListening(this.getDispenseEventName(), this.m_DispenseItem);
+		Debug.Log("INitializing dispensersers with listening name: " + this.GetDispenseEventName());
+		this._EventSource.StartListening(this.GetDispenseEventName(), this.m_DispenseItem);
 	}
 
-	protected string getDispenseEventName() {
+	protected string GetDispenseEventName() {
 		return Dispenser.EVENT_PREFIX + bulletPrefab.GetComponent<CatchMeScript>().catchType;
 	}
 
@@ -56,7 +61,9 @@ public class Dispenser : MonoBehaviour {
 
   // public interface, negation logic and filtering should be here
 	public void  DispenseItem() {
+		Debug.Log("Dispensing Item?");
 		if (dispenserActive) {
+			Debug.Log("YEP DEISPSFGNS");
 			SpawnItem();
 		}
 	}

@@ -26,7 +26,7 @@ public class Collector : MonoBehaviour {
 	private List<CatchMeScript> contents = new List<CatchMeScript>();
 
 	void Start() {
-		Screen = ScreenTextObject.GetComponent<BinScreen>();
+		// Screen = ScreenTextObject.GetComponent<BinScreen>();
 		// BinLever = BinLeverObject.GetComponent<NVRLever>();
 
 	}
@@ -90,7 +90,7 @@ public class Collector : MonoBehaviour {
 			subject.GoAway();
 		}
 		contents.Clear();
-		Screen.UpdateText(this);
+		// Screen.UpdateText(this);
 	}
 
 	public bool State(int stateValue) {

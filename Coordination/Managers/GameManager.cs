@@ -74,13 +74,13 @@ public class GameManager {
   }
 
   void UpdateScoreboard() {
-    this.ScoreBoard.UpdateText(
-      bins: 0,
-      errors: this.RoundManager.Errors(),
-      score: this.ScoreKeeper.Score,
-      round: this.RoundManager.Round(),
-      gameOn: this.gameOn
-    );
+    // this.ScoreBoard.UpdateText(
+    //   bins: 0,
+    //   errors: this.RoundManager.Errors(),
+    //   score: this.ScoreKeeper.Score,
+    //   round: this.RoundManager.Round(),
+    //   gameOn: this.gameOn
+    // );
   }
 
   void CheckErrors() {
