@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Scoring;
+using UnityEngine.Events;
 
 public class GameManager {
-  // @todo these values will probably be moved into a scoring strategy
 	bool gameOn = false;
+
+	public const string EVENT_GAMESTART = "game_start";
+
+	private UnityAction m_GameStartAction;
 
 	protected ScoreboardDisplay ScoreBoard;
 
@@ -23,11 +26,23 @@ public class GameManager {
   public ScoreKeeper ScoreKeeper {
 		get { return this._scoreKeeper; }
 		private set {
-			this.ScoreKeeper = value;
-			this.ScoreKeeper.OnUpdate += this.UpdateScoreboard;
+			this._scoreKeeper = value;
+			this._scoreKeeper.OnUpdate += this.UpdateScoreboard;
 		}
 	}
 
+	protected EventSource _eventSource;
+	public EventSource EventSource {
+		get { return this._eventSource; }
+		set {
+			if (this._eventSource == null) {
+				this._eventSource.StopListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
+			}
+
+			this._eventSource = value;
+			this._eventSource.StartListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
+		}
+	}
 
   public delegate void UpdateAction();
   public event UpdateAction OnUpdate;
@@ -35,9 +50,13 @@ public class GameManager {
 	/**
 	 * Constructor
 	 */
-	public GameManager (RoundManager RoundManager, ScoreKeeper ScoreKeeper) {
+	public GameManager (RoundManager RoundManager, ScoreKeeper ScoreKeeper, EventSource EventSource) {
+		// Register our StartGame() with our unity action.
+		this.m_GameStartAction += this.StartGame;
+
 		this.RoundManager = RoundManager;
 		this.ScoreKeeper = ScoreKeeper;
+		this.EventSource = EventSource;
 
 		// Register to our own update event
 		this.OnUpdate += this.UpdateScoreboard;

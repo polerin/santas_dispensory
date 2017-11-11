@@ -14,5 +14,6 @@ public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller>
       Container.Bind<GameManager>().AsSingle();
       Container.Bind<RoundManager>().AsSingle();
       Container.Bind<ScoreKeeper>().AsSingle();
+      Container.Bind<EventSource>().AsSingle();
     }
 }
