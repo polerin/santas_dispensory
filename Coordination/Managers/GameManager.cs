@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Scoring;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class GameManager {
@@ -35,7 +36,7 @@ public class GameManager {
 	public EventSource EventSource {
 		get { return this._eventSource; }
 		set {
-			if (this._eventSource == null) {
+			if (this._eventSource != null) {
 				this._eventSource.StopListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
 			}
 
@@ -89,6 +90,7 @@ public class GameManager {
   }
 
 	void StartGame() {
+		Debug.Log("STARTING THE DAMN GAAAAME");
     this.RoundManager.StartGame();
     this.ScoreKeeper.StartGame();
 

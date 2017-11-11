@@ -6,7 +6,7 @@ using Zenject;
 
 public class Dispenser : MonoBehaviour {
 
-	private const string EVENT_PREFIX = "dispenser_send_";
+	public const string EVENT_PREFIX = "dispenser_send_";
 
 	public float shootSpeed = 8.5f;
 	public float shootWindow = .5f;
@@ -45,6 +45,7 @@ public class Dispenser : MonoBehaviour {
 		return Dispenser.EVENT_PREFIX + bulletPrefab.GetComponent<CatchMeScript>().catchType;
 	}
 
+
 	public void Activate() {
 		dispenserActive = true;
 	}
@@ -59,11 +60,6 @@ public class Dispenser : MonoBehaviour {
 			SpawnItem();
 		}
 	}
-
-	void Update()
-	{
-	}
-
 
 	// spawns an item regardless of state
 	void SpawnItem()

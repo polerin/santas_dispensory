@@ -78,13 +78,16 @@ public class RoundManager {
 	}
 
 	public void StartRound(int roundNumber) {
+    Debug.Log("STARTING ROUND?");
     if (!this.gameOn) {
+      Debug.Log("Not starting round");
       return;
     }
 
     for (int i = 0; i < this.knownBins.Count; i++) {
       this.ResetBin(this.knownBins[i]);
     }
+    Debug.Log("starting round");
 	}
 
   public void ScoreBin(Collector subjectBin) {

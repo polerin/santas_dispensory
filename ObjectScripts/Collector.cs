@@ -40,6 +40,8 @@ public class Collector : MonoBehaviour {
 
 	void Update() {
 		// if (BinLever.LeverEngaged || Input.GetKeyDown(KeyCode.P)) {
+
+		// @TODO REMOVE THE INPUT
 		if (Input.GetKeyDown(KeyCode.P)) {
 			this.RedeemList();
 		}

@@ -36,11 +36,12 @@ public class EventSource {
 
   public  void TriggerEvent(string eventName)
   {
-      UnityEvent thisEvent = null;
-      if (this.eventDictionary.TryGetValue(eventName, out thisEvent))
-      {
-          thisEvent.Invoke();
-      }
+    Debug.Log("Triggering: eventName");
+    UnityEvent thisEvent = null;
+    if (this.eventDictionary.TryGetValue(eventName, out thisEvent))
+    {
+      thisEvent.Invoke();
+    }
   }
 
 }
