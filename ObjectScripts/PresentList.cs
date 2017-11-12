@@ -14,11 +14,10 @@ public class PresentList {
 
   public PresentList() {
     // init our counts
-    this.presentCounts.Add("star", 0);
-    this.presentCounts.Add("ball", 0);
-    this.presentCounts.Add("candy", 0);
+    this.presentCounts.Add("horse", 0);
     this.presentCounts.Add("bear", 0);
     this.presentCounts.Add("present", 0);
+    this.presentCounts.Add("ornament", 0);
 
     // mark when the list was created
     this.MarkStart();

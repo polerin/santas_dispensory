@@ -6,6 +6,7 @@ using Zenject;
 
 public class Collector : MonoBehaviour {
 	[SerializeField] private GameObject ScreenTextObject;
+	[SerializeField] private GameObject ScoreTrigger;
 	// public GameObject ScreenTextObj;
 	private BinScreen Screen;
 
@@ -26,7 +27,7 @@ public class Collector : MonoBehaviour {
 	private List<CatchMeScript> contents = new List<CatchMeScript>();
 
 	void Start() {
-		// Screen = ScreenTextObject.GetComponent<BinScreen>();
+		Screen = ScreenTextObject.GetComponent<BinScreen>();
 		// BinLever = BinLeverObject.GetComponent<NVRLever>();
 
 	}
@@ -36,15 +37,8 @@ public class Collector : MonoBehaviour {
 	{
 		this._RoundManager = Manager;
 		this._RoundManager.Register(this);
-	}
 
-	void Update() {
-		// if (BinLever.LeverEngaged || Input.GetKeyDown(KeyCode.P)) {
-
-		// @TODO REMOVE THE INPUT
-		if (Input.GetKeyDown(KeyCode.P)) {
-			this.RedeemList();
-		}
+		this.ScoreTrigger.GetComponent<ScoreTrigger>().OnTriggerScoring += this.RedeemList;
 	}
 
 	public void AddPresentList(PresentList newList) {
@@ -90,7 +84,7 @@ public class Collector : MonoBehaviour {
 			subject.GoAway();
 		}
 		contents.Clear();
-		// Screen.UpdateText(this);
+		Screen.UpdateText(this);
 	}
 
 	public bool State(int stateValue) {

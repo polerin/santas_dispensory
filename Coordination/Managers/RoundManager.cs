@@ -41,7 +41,6 @@ public class RoundManager {
 
 	public void Register(Dispenser subjectDispenser) {
 		if (!this.knownDispensers.Contains(subjectDispenser)) {
-      subjectDispenser.Activate();
       this.OnDispense += subjectDispenser.DispenseItem;
 			this.knownDispensers.Add(subjectDispenser);
 		}
@@ -60,12 +59,6 @@ public class RoundManager {
 
 	}
 
-	// @todo this might get moved off into a Stage strategy
-	public void ResetBin(Collector subjectBin) {
-    subjectBin.Wait(false);
-		subjectBin.GetPresentList().GenerateRandomCounts();
-    subjectBin.EmptyCollector();
-	}
 
 	public void StartGame() {
     this.gameOn = true;
@@ -78,17 +71,40 @@ public class RoundManager {
 	}
 
 	public void StartRound(int roundNumber) {
-    Debug.Log("STARTING ROUND?");
     if (!this.gameOn) {
       Debug.Log("Not starting round");
       return;
     }
 
+    this.ResetBins();
+    this.ActivateDispensers();
+    Debug.Log("starting round");
+	}
+
+  protected void ActivateDispensers() {
+    for (int i = 0; i < this.knownDispensers.Count; i++) {
+      this.knownDispensers[i].Activate();
+    }
+  }
+
+  protected void ResetBins() {
     for (int i = 0; i < this.knownBins.Count; i++) {
       this.ResetBin(this.knownBins[i]);
     }
-    Debug.Log("starting round");
+  }
+
+  // @todo this might get moved off into a Stage strategy
+	public void ResetBin(Collector subjectBin) {
+    subjectBin.Wait(false);
+		subjectBin.GetPresentList().GenerateRandomCounts();
+    subjectBin.EmptyCollector();
 	}
+
+  public void DeactivateBins() {
+    for (int i = 0; i < this.knownBins.Count; i++) {
+      this.knownBins[i].Wait(true);
+    }
+  }
 
   public void ScoreBin(Collector subjectBin) {
     if (!this.ScoreKeeper.ScoreBin(subjectBin)) {
@@ -121,14 +137,5 @@ public class RoundManager {
 	// Use this for initialization
 	void Start () {
 
-	}
-
-	// Update is called once per frame
-	void Update () {
-    if (Input.GetKeyDown(KeyCode.Space) && this.OnDispense != null && gameOn)
-    {
-      Debug.Log("Firing prooooojectile");
-      this.OnDispense();
-    }
 	}
 }

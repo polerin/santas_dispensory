@@ -61,7 +61,6 @@ public class Dispenser : MonoBehaviour {
 
   // public interface, negation logic and filtering should be here
 	public void  DispenseItem() {
-		Debug.Log("Dispensing Item?");
 		if (dispenserActive) {
 			Debug.Log("YEP DEISPSFGNS");
 			SpawnItem();

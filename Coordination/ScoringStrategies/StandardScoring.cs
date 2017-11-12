@@ -7,10 +7,9 @@ namespace Scoring {
     Dictionary<string, int> presentWorths = new Dictionary<string,int>()
     {
       {"present", 1},
-      {"candy", 2},
-      {"star", 3},
+      {"horse", 2},
       {"bear", 5},
-      {"ball", 10},
+      {"ornament", 10}
     };
 
     public void ScoreList(PresentList binList, Dictionary<string, int> binContents) {

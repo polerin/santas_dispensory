@@ -35,7 +35,20 @@ public class GameContainer : MonoBehaviour {
 		}
 
 		if (Input.GetKeyDown(KeyCode.Keypad1)) {
-			this._EventSource.TriggerEvent(Dispenser.EVENT_PREFIX + "Bear");
+			this._EventSource.TriggerEvent(Dispenser.EVENT_PREFIX + "bear");
+		}
+
+
+		if (Input.GetKeyDown(KeyCode.Keypad2)) {
+			this._EventSource.TriggerEvent(Dispenser.EVENT_PREFIX + "present");
+		}
+
+		if (Input.GetKeyDown(KeyCode.Keypad3)) {
+			this._EventSource.TriggerEvent(Dispenser.EVENT_PREFIX + "ball");
+		}
+
+		if (Input.GetKeyDown(KeyCode.Keypad4)) {
+			this._EventSource.TriggerEvent(Dispenser.EVENT_PREFIX + "horse");
 		}
 	}
 }
