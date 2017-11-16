@@ -17,7 +17,7 @@ public class Dispenser : MonoBehaviour {
 	public float aimSide = 0;
 	public float aimSideWindow = .5f;
 
-
+	[SerializeField] ParticleSystem Particles;
 	[SerializeField] GameObject PlayerObj;
 	[SerializeField] GameObject bulletPrefab;
 
@@ -27,23 +27,23 @@ public class Dispenser : MonoBehaviour {
 	private RoundManager _RoundManager;
 	private EventSource _EventSource;
 
-	void Start() {
-		Debug.Log("yasldfasdfyasdf");
-	}
-
 
 	[Inject]
 	void Init(RoundManager Manager, EventSource EventSource)
 	{
 		// Add our DispenseItem() to the unity action
-		this.m_DispenseItem += this.DispenseItem;
+		m_DispenseItem += this.DispenseItem;
 
-		this._RoundManager = Manager;
-		this._RoundManager.Register(this);
+		_RoundManager = Manager;
+		_RoundManager.Register(this);
 
-		this._EventSource = EventSource;
-		Debug.Log("INitializing dispensersers with listening name: " + this.GetDispenseEventName());
-		this._EventSource.StartListening(this.GetDispenseEventName(), this.m_DispenseItem);
+		_EventSource = EventSource;
+		_EventSource.StartListening(this.GetDispenseEventName(), this.m_DispenseItem);
+	}
+
+	void OnDestroy()
+	{
+		_EventSource.StopListening(this.GetDispenseEventName(), this.m_DispenseItem);
 	}
 
 	protected string GetDispenseEventName() {
@@ -62,7 +62,6 @@ public class Dispenser : MonoBehaviour {
   // public interface, negation logic and filtering should be here
 	public void  DispenseItem() {
 		if (dispenserActive) {
-			Debug.Log("YEP DEISPSFGNS");
 			SpawnItem();
 		}
 	}
@@ -70,6 +69,7 @@ public class Dispenser : MonoBehaviour {
 	// spawns an item regardless of state
 	void SpawnItem()
 	{
+		this.Particles.Play();
 		//Instantiate/Create Bullet
     GameObject tempObj = Instantiate(bulletPrefab);
 		tempObj.transform.position = this.gameObject.transform.position;

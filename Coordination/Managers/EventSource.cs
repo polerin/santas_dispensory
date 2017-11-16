@@ -34,14 +34,17 @@ public class EventSource {
       }
   }
 
-  public  void TriggerEvent(string eventName)
-  {
-    Debug.Log("Triggering: " + eventName );
 
+  /**
+   * Overloading these because the UnityEvent itself is overloaded.
+   */
+
+  public void TriggerEvent(string eventName)
+  {
     UnityEvent thisEvent = null;
     if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
+      Debug.Log("Triggering: " + eventName + " with no details" );
       thisEvent.Invoke();
     }
   }
-
 }

@@ -33,10 +33,12 @@ public class Collector : MonoBehaviour {
 	}
 
 	[Inject]
-	void Init(RoundManager Manager)
+	void Init(RoundManager Manager, PresentList List)
 	{
 		this._RoundManager = Manager;
 		this._RoundManager.Register(this);
+
+		this.AddPresentList(List);
 
 		this.ScoreTrigger.GetComponent<ScoreTrigger>().OnTriggerScoring += this.RedeemList;
 	}
@@ -53,6 +55,10 @@ public class Collector : MonoBehaviour {
 		return currentList;
 	}
 
+	public bool Wait() {
+		return this.Wait(true);
+	}
+
 	public bool Wait(bool desiredState) {
 		if (this.State(this.StateWaiting) != desiredState) {
 			this.FlipState(this.StateWaiting);
@@ -61,22 +67,15 @@ public class Collector : MonoBehaviour {
 		return true;
 	}
 
-	public bool Wait() {
-		return this.Wait(true);
+	public void Reset() {
+		this.Wait(false);
+		this.GetPresentList().GenerateRandomCounts();
+		this.EmptyCollector();
 	}
 
-	public Dictionary<string, int> GetContentCount() {
-		Dictionary<string, int> counts = new Dictionary<string, int>();
-
-		foreach (CatchMeScript subject in this.contents) {
-			if (!counts.ContainsKey(subject.catchType)) {
-				counts[subject.catchType] = 1;
-			} else {
-				counts[subject.catchType] = (int)counts[subject.catchType] + 1;
-			}
-		}
-
-		return counts;
+	public void Deactivate() {
+		this.Wait(true);
+		this.EmptyCollector();
 	}
 
 	public void EmptyCollector() {
@@ -151,5 +150,20 @@ public class Collector : MonoBehaviour {
 
 	bool CanAccept() {
 		return (this.State(StateReady) && !this.State(StateAway) && !this.State(StateWaiting));
+	}
+
+
+	public Dictionary<string, int> GetContentCount() {
+		Dictionary<string, int> counts = new Dictionary<string, int>();
+
+		foreach (CatchMeScript subject in this.contents) {
+			if (!counts.ContainsKey(subject.catchType)) {
+				counts[subject.catchType] = 1;
+			} else {
+				counts[subject.catchType] = (int)counts[subject.catchType] + 1;
+			}
+		}
+
+		return counts;
 	}
 }

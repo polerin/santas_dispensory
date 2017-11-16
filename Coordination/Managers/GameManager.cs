@@ -7,7 +7,17 @@ using UnityEngine.Events;
 public class GameManager {
 	bool gameOn = false;
 
+	// Issued to start the game.  (not issued by game manager)
 	public const string EVENT_GAMESTART = "game_start";
+
+	// Issued to signal that the game has just started
+	public const string EVENT_GAMESTART_AFTER = "game_start_after";
+
+  // Issued to signal that the game is ending
+	public const string EVENT_GAMEEND = "game_end";
+
+	//Issued to signal that the game has just ended
+	public const string EVENT_GAMEEND_AFTER = "game_end_after";
 
 	private UnityAction m_GameStartAction;
 
@@ -23,25 +33,22 @@ public class GameManager {
 		}
 	}
 
+
+	// @TODO I don't think the game manager needs the score keeper any more, double check.
   protected ScoreKeeper _scoreKeeper;
   public ScoreKeeper ScoreKeeper {
 		get { return this._scoreKeeper; }
 		private set {
 			this._scoreKeeper = value;
-			this._scoreKeeper.OnUpdate += this.UpdateScoreboard;
 		}
 	}
 
-	protected EventSource _eventSource;
+	protected EventSource _EventSource;
 	public EventSource EventSource {
-		get { return this._eventSource; }
+		get { return this._EventSource; }
 		set {
-			if (this._eventSource != null) {
-				this._eventSource.StopListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
-			}
-
-			this._eventSource = value;
-			this._eventSource.StartListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
+			this._EventSource = value;
+			this._EventSource.StartListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
 		}
 	}
 
@@ -61,6 +68,10 @@ public class GameManager {
 
 		// Register to our own update event
 		this.OnUpdate += this.UpdateScoreboard;
+	}
+
+  ~GameManager() {
+		_EventSource.StopListening(GameManager.EVENT_GAMESTART, this.m_GameStartAction);
 	}
 
   public bool GameState() {
@@ -90,20 +101,22 @@ public class GameManager {
   }
 
 	void StartGame() {
-		Debug.Log("STARTING THE DAMN GAAAAME");
-    this.RoundManager.StartGame();
-    this.ScoreKeeper.StartGame();
-
 		this.gameOn = true;
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
+
+		// @TODO remove me once the Round manager and scoreboard are updated for events
     this.StartRound();
 	}
 
   void EndGame() {
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
+    this.gameOn = false;
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
+
     this.EndRound();
     this.RoundManager.EndGame();
     this.ScoreKeeper.EndGame();
 
-    this.gameOn = false;
 	}
 
   void StartRound(int roundNumber = 0) {

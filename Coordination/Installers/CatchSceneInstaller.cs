@@ -11,6 +11,8 @@ public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller>
     {
       Container.Bind<IScoringStrategy>().To<StandardScoring>().AsCached();
 
+      Container.Bind<PresentList>().AsTransient();
+
       Container.Bind<GameManager>().AsSingle();
       Container.Bind<RoundManager>().AsSingle();
       Container.Bind<ScoreKeeper>().AsSingle();

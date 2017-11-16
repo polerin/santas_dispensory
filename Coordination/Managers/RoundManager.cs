@@ -1,84 +1,110 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class RoundManager {
+
+  public const string EVENT_ROUNDSTART = "round_start";
+  public const string EVENT_ROUNDEND = "round_end";
+
+	private UnityAction m_GameStartAction;
+  private UnityAction m_GameEndAction;
+
   RoundDefinition[] Waves;
-  ScoreKeeper ScoreKeeper;
+  ScoreKeeper _ScoreKeeper;
+  GameManager _GameManager;
+  EventSource _EventSource;
 
 	List<Collector> knownBins = new List<Collector>();
 	List<Dispenser> knownDispensers = new List<Dispenser>();
 
-  int currentRound = 0;
-  int errorCount = 0;
   int maxErrors = 3;
-  bool gameOn = false;
 
+
+  // @TODO Remove me once scoreboard is set up with events
   public delegate void UpdateAction();
   public event UpdateAction OnUpdate;
 
-  public delegate void DispenseAction();
-  public event DispenseAction OnDispense;
-
-  public int Round() {
-    return this.currentRound;
+  private int _Round = 0;
+  public int Round {
+      get { return this._Round; }
+      protected set { this._Round = value; }
   }
 
-  public int Errors() {
-    return this.errorCount;
+
+  private int _Errors = 0;
+  public int Errors {
+    get { return this._Errors; }
+    protected set { this._Errors = value; }
   }
 
-  public bool HitMaxErrors() {
-    return (this.errorCount >= this.maxErrors);
+
+  /**
+   * Constructor
+   */
+  public RoundManager (GameManager Manager, ScoreKeeper Keeper, EventSource Source)
+  {
+    this._GameManager = Manager;
+    this._ScoreKeeper = Keeper;
+
+    this._EventSource = Source;
+    _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+    _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+
+    // Register our StartGame() with our unity action.
+    this.m_GameStartAction += this.StartGame;
+    this.m_GameEndAction += this.EndGame;
   }
 
-	public void Register(Collector subjectBin) {
+  /**
+   * Finalizer.  Clean up after ourselves.
+   */
+  ~RoundManager () {
+    _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+    _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+  }
+
+	public void Register(Collector subjectBin)
+  {
 		if (!this.knownBins.Contains(subjectBin)) {
-      this.InitBin(subjectBin);
 			this.knownBins.Add(subjectBin);
 		}
 	}
 
-	public void Register(Dispenser subjectDispenser) {
+	public void Register(Dispenser subjectDispenser)
+  {
 		if (!this.knownDispensers.Contains(subjectDispenser)) {
-      this.OnDispense += subjectDispenser.DispenseItem;
 			this.knownDispensers.Add(subjectDispenser);
 		}
 	}
 
-  public void AddScoreKeeper(ScoreKeeper keeper) {
-    this.ScoreKeeper = keeper;
+  public bool HitMaxErrors() {
+    return (Errors >= maxErrors);
   }
 
-	public void InitBin(Collector subjectBin) {
-		if (!subjectBin.State(subjectBin.StateReady)) {
-			PresentList newList = new PresentList();
-			subjectBin.AddPresentList(newList);
-			subjectBin.Wait();
-		}
-
-	}
-
-
 	public void StartGame() {
-    this.gameOn = true;
-    this.currentRound = 0;
-    this.errorCount = 0;
+    this.Round = 0;
+    this.Errors = 0;
 	}
 
 	public void EndGame() {
-    this.gameOn = false;
+    EndRound();
 	}
 
 	public void StartRound(int roundNumber) {
-    if (!this.gameOn) {
-      Debug.Log("Not starting round");
+    if (!_GameManager.GameState()) {
       return;
     }
 
+    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDSTART);
     this.ResetBins();
     this.ActivateDispensers();
-    Debug.Log("starting round");
+	}
+
+	public void EndRound() {
+    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDEND);
+    this.DeactivateBins();
 	}
 
   protected void ActivateDispensers() {
@@ -89,53 +115,38 @@ public class RoundManager {
 
   protected void ResetBins() {
     for (int i = 0; i < this.knownBins.Count; i++) {
-      this.ResetBin(this.knownBins[i]);
+      this.knownBins[i].Reset();
     }
   }
 
-  // @todo this might get moved off into a Stage strategy
-	public void ResetBin(Collector subjectBin) {
-    subjectBin.Wait(false);
-		subjectBin.GetPresentList().GenerateRandomCounts();
-    subjectBin.EmptyCollector();
-	}
-
   public void DeactivateBins() {
     for (int i = 0; i < this.knownBins.Count; i++) {
-      this.knownBins[i].Wait(true);
+      this.knownBins[i].Deactivate();
     }
   }
 
   public void ScoreBin(Collector subjectBin) {
-    if (!this.ScoreKeeper.ScoreBin(subjectBin)) {
+    if (!_ScoreKeeper.ScoreBin(subjectBin)) {
       this.AddError();
     }
-    this.ResetBin(subjectBin);
 
+    subjectBin.Reset();
     this.FireUpdate();
   }
 
-	public void EndRound() {
-
-	}
-
   void AddError() {
-    this.errorCount += 1;
+    this.Errors += 1;
   }
 
+  // @TODO delete me when the rest of the managers are updated to use events.
   void FireUpdate() {
     if (this.OnUpdate != null) {
       this.OnUpdate();
     }
   }
 
-
   bool ShouldClearOnScore() {
     return true;
   }
 
-	// Use this for initialization
-	void Start () {
-
-	}
 }
