@@ -4,84 +4,86 @@ using UnityEngine;
 using Scoring;
 
 public class ScoreKeeper {
-	bool gameOn = false;
-  int currentRound;
 
-	int currentScore = 0;
-	public int Score {
-		get { return currentScore; }
-	}
+	private UnityAction m_GameStartAction;
+	// private UnityAction m_GameEndAction;
+
+	IScoringStrategy ScoringStrategy;
+	GameManager _GameManager;
+
+  int currentRound;
 
 	List<int> roundScores = new List<int>();
 
-	IScoringStrategy ScoringStrategy;
-
-	public delegate void UpdateAction();
-  public event UpdateAction OnUpdate;
+	private int _Score;
+	public int Score {
+		get { return _Score; }
+		protected set { _Score = value }
+	}
 
 	/**
 	 * Constructor
 	 */
-	public ScoreKeeper(IScoringStrategy scoring) {
-		this.ScoringStrategy = scoring;
+	public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring) {
+		this._GameManager = GameManager;
+		this._ScoringStrategy = scoring;
+
+		_EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+		// _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+
+		// Register our StartGame() with our unity action.
+		this.m_GameStartAction += this.StartGame;
+		// this.m_GameEndAction += this.EndGame
+	}
+
+	~ScoreKeeper() {
+		if (!_EventSource) {
+			return;
+		}
+
+		_EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+		_EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction)
 	}
 
 	public bool ScoreBin(Collector subjectBin) {
-		if (!this.gameOn) {
+		if (!_GameManager.GameState()) {
 			return false;
 		}
 
 		PresentList binList = subjectBin.GetPresentList();
 		Dictionary<string, int> binContents = subjectBin.GetContentCount();
 
-    this.ScoringStrategy.ScoreList(binList, binContents);
-    this.AddToScore(binList);
+    _ScoringStrategy.ScoreList(binList, binContents);
+    AddToScore(binList);
 
     // add bin checking logic
     return binList.SuccessfulScoring();
 	}
 
 	void AddToScore(PresentList binList) {
-    this.AddToScore(binList.Score());
+    AddToScore(binList.Score());
   }
 
   void AddToScore(int points) {
-    this.currentScore += points;
-    this.roundScores[this.currentRound] += points;
+    currentScore += points;
+    roundScores[currentRound] += points;
   }
 
 	public void StartGame() {
-    this.currentScore = 0;
-		this.gameOn = true;
-	}
-
-  public void EndGame() {
-		this.gameOn = false;
+    currentScore = 0;
 	}
 
   public void StartRound(int roundNumber) {
-		if (!this.gameOn) {
+		if (!_GameManager.GameState()) {
 			return;
 		}
 
-		if (this.roundScores.Count > roundNumber) {
-			this.roundScores[roundNumber] = 0;
+		if (roundScores.Count > roundNumber) {
+			roundScores[roundNumber] = 0;
 		} else {
-			this.roundScores.Insert(roundNumber, 0);
+			roundScores.Insert(roundNumber, 0);
 		}
 
-		this.currentRound = roundNumber;
+		currentRound = roundNumber;
 	}
-
-	public void EndRound() {
-
-	}
-
-  void FireUpdate() {
-    if (this.OnUpdate != null) {
-      this.OnUpdate();
-    }
-  }
-
-
 }

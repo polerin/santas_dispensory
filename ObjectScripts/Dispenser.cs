@@ -32,18 +32,18 @@ public class Dispenser : MonoBehaviour {
 	void Init(RoundManager Manager, EventSource EventSource)
 	{
 		// Add our DispenseItem() to the unity action
-		m_DispenseItem += this.DispenseItem;
+		m_DispenseItem += DispenseItem;
 
 		_RoundManager = Manager;
 		_RoundManager.Register(this);
 
 		_EventSource = EventSource;
-		_EventSource.StartListening(this.GetDispenseEventName(), this.m_DispenseItem);
+		_EventSource.StartListening(GetDispenseEventName(), m_DispenseItem);
 	}
 
 	void OnDestroy()
 	{
-		_EventSource.StopListening(this.GetDispenseEventName(), this.m_DispenseItem);
+		_EventSource.StopListening(GetDispenseEventName(), m_DispenseItem);
 	}
 
 	protected string GetDispenseEventName() {
@@ -69,10 +69,10 @@ public class Dispenser : MonoBehaviour {
 	// spawns an item regardless of state
 	void SpawnItem()
 	{
-		this.Particles.Play();
+		Particles.Play();
 		//Instantiate/Create Bullet
     GameObject tempObj = Instantiate(bulletPrefab);
-		tempObj.transform.position = this.gameObject.transform.position;
+		tempObj.transform.position = gameObject.transform.position;
 
     //Get the Rigidbody that is attached to that instantiated bullet
     Rigidbody projectile = tempObj.GetComponent<Rigidbody>();
