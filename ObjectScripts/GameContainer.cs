@@ -6,12 +6,10 @@ using Zenject;
 public class GameContainer : MonoBehaviour {
 
 	private EventSource _EventSource;
-	private GameManager _GameManager;
 
 	[Inject]
-	void Init(EventSource EventSource, GameManager GameManager)
+	void Init(EventSource EventSource)
 	{
-		this._GameManager = GameManager;
 		this._EventSource = EventSource;
 	}
 

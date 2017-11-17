@@ -43,6 +43,10 @@ public class Dispenser : MonoBehaviour {
 
 	void OnDestroy()
 	{
+		if (_EventSource == null) {
+			return;
+		}
+
 		_EventSource.StopListening(GetDispenseEventName(), m_DispenseItem);
 	}
 

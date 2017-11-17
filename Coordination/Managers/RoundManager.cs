@@ -65,7 +65,7 @@ public class RoundManager {
    * Finalizer.  Clean up after ourselves.
    */
   ~RoundManager () {
-    if (!_EventSource) {
+    if (_EventSource == null) {
       return;
     }
 

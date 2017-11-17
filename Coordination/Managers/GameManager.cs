@@ -19,7 +19,6 @@ public class GameManager {
 	//Issued to signal that the game has just ended
 	public const string EVENT_GAMEEND_AFTER = "game_end_after";
 
-
 	private UnityAction m_GameStartAction;
 	private UnityAction m_MaxErrorsAction;
 
@@ -29,7 +28,8 @@ public class GameManager {
 	/**
 	 * Constructor
 	 */
-	public GameManager (ScoreKeeper ScoreKeeper, EventSource EventSource) {
+	public GameManager (EventSource EventSource) {
+		InitMonitors();
 		_EventSource = EventSource;
 
 		_EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
@@ -44,6 +44,15 @@ public class GameManager {
 
   ~GameManager() {
 		_EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
+	}
+
+	protected void InitMonitors() {
+		if (Display.displays.Length <= 1) {
+			Debug.Log("Well that's odd, no real monitor");
+			return;
+		}
+
+		Display.displays[1].Activate();
 	}
 
   public bool GameState() {

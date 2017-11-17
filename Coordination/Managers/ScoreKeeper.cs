@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Scoring;
 
 public class ScoreKeeper {
@@ -8,8 +9,9 @@ public class ScoreKeeper {
 	private UnityAction m_GameStartAction;
 	// private UnityAction m_GameEndAction;
 
-	IScoringStrategy ScoringStrategy;
+	EventSource _EventSource;
 	GameManager _GameManager;
+	IScoringStrategy _ScoringStrategy;
 
   int currentRound;
 
@@ -18,13 +20,13 @@ public class ScoreKeeper {
 	private int _Score;
 	public int Score {
 		get { return _Score; }
-		protected set { _Score = value }
+		protected set { _Score = value; }
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring) {
+	public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring, EventSource _EventSource) {
 		this._GameManager = GameManager;
 		this._ScoringStrategy = scoring;
 
@@ -37,12 +39,12 @@ public class ScoreKeeper {
 	}
 
 	~ScoreKeeper() {
-		if (!_EventSource) {
+		if (_EventSource == null) {
 			return;
 		}
 
 		_EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
-		_EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction)
+		// _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 	}
 
 	public bool ScoreBin(Collector subjectBin) {
@@ -65,12 +67,12 @@ public class ScoreKeeper {
   }
 
   void AddToScore(int points) {
-    currentScore += points;
+    Score += points;
     roundScores[currentRound] += points;
   }
 
 	public void StartGame() {
-    currentScore = 0;
+    Score = 0;
 	}
 
   public void StartRound(int roundNumber) {
