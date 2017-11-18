@@ -1,4 +1,5 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using Scoring;
 using UnityEngine;
@@ -18,6 +19,12 @@ public class GameManager {
 
 	//Issued to signal that the game has just ended
 	public const string EVENT_GAMEEND_AFTER = "game_end_after";
+
+	// Base Resource path where the game definition JSON files are stored.
+  private const string PATH_GAMEDEFINITION = "GameDefinitions/";
+
+	// Default json string returned if a Game Definition can't be loaded.
+  private const string DEFAULT_GAMEDEF = "{}";
 
 	private UnityAction m_GameStartAction;
 	private UnityAction m_MaxErrorsAction;
@@ -70,4 +77,20 @@ public class GameManager {
 		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
 	}
 
+	protected GameDefinition LoadGameDefinition(GameTypes Type) {
+    return JsonUtility.FromJson<GameDefinition>(LoadJson(Type));
+  }
+
+  protected string LoadJson(GameTypes Type) {
+		string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type) + ".json";
+    TextAsset GameJson = (TextAsset) Resources.Load(ResourcePath);
+
+    if (GameJson == null) {
+      // throw something here?
+      return GameManager.DEFAULT_GAMEDEF;
+    }
+
+
+    return GameJson.text;
+  }
 }

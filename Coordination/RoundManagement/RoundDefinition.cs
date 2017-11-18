@@ -1,5 +1,8 @@
-public class RoundDefinition {
-  public int activeBins = 1;
+public struct RoundDefinition {
+  public string roundType;
   public int listCount;
-  public bool[] dispensers;
+  public bool[] bins;
+  public string[] dispensers;
+
+  public int? maxTime;
 }
