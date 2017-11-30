@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class GameManager {
-	bool gameOn = false;
+	private bool gameOn = false;
 
 	// Issued to start the game.  (not issued by game manager)
 	public const string EVENT_GAMESTART = "game_start";
@@ -20,6 +20,18 @@ public class GameManager {
 	//Issued to signal that the game has just ended
 	public const string EVENT_GAMEEND_AFTER = "game_end_after";
 
+  // Notification that a round is about to start
+  public const string EVENT_ROUNDSTART = "round_start";
+
+  // Notification that a round is about to end
+  public const string EVENT_ROUNDEND = "round_end";
+
+  // Notification that an error is about to be added.
+  public const string EVENT_ERRORADDED = "round_error_add";
+
+  // Notification that the player has hit the maximum error count
+  public const string EVENT_MAXERRORS = "round_max_errors";
+
 	// Base Resource path where the game definition JSON files are stored.
   private const string PATH_GAMEDEFINITION = "GameDefinitions/";
 
@@ -31,6 +43,9 @@ public class GameManager {
 
 	protected ScoreboardDisplay ScoreBoard;
 	protected EventSource _EventSource;
+
+	public GameDefinition CurrentGame { public get, protected set }
+	public RoundDefinition CurrentRound { public get, protected set }
 
 	/**
 	 * Constructor
@@ -53,6 +68,72 @@ public class GameManager {
 		_EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
 	}
 
+
+  public bool GameState() {
+		if (CurrentGame == null) {
+			return false;
+		}
+
+    return CurrentGame.gameOn;
+  }
+
+  public void AddError() {
+    // @TODO figure out how to send back a cancel.  Exception?
+    _EventSource.TriggerEvent(GameManager.EVENT_ERRORADDED);
+
+    Errors += 1;
+
+    if (Errors >= maxErrors) {
+      _EventSource.TriggerEvent(GameManager.EVENT_MAXERRORS);
+    }
+  }
+
+	/* Game Lifecycle event management */
+
+	protected void StartGame() {
+		if (GameState()) {
+			Debug.Log("Attempting to start an already started game");
+			return;
+		}
+
+		CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
+		CurrentGame.gameOn = true;
+
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
+
+		StartRound();
+	}
+
+  protected void EndGame() {
+		if (!GameState()) {
+			Denug.Log("Attempting to End an inactive game");
+			return;
+		}
+
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
+    CurrentGame.gameOn = false;
+
+		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
+	}
+
+	protected void StartRound() {
+    if (!GameState()) {
+      return;
+    }
+
+		CurrentGame.currentRound++;
+		CurrentRound = CurrentGame.Rounds[CurrentGame.currentRound];
+
+    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDSTART);
+	}
+
+	protected void EndRound() {
+    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDEND);
+	}
+
+
+	/* Mechanics and loading methods. */
+
 	protected void InitMonitors() {
 		if (Display.displays.Length <= 1) {
 			Debug.Log("Well that's odd, no real monitor");
@@ -60,21 +141,6 @@ public class GameManager {
 		}
 
 		Display.displays[1].Activate();
-	}
-
-  public bool GameState() {
-    return gameOn;
-  }
-
-	void StartGame() {
-		gameOn = true;
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
-	}
-
-  void EndGame() {
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
-    gameOn = false;
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
 	}
 
 	protected GameDefinition LoadGameDefinition(GameTypes Type) {

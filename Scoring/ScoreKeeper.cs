@@ -6,7 +6,7 @@ using Scoring;
 
 public class ScoreKeeper {
 
-	private UnityAction m_GameStartAction;
+	UnityAction m_GameStartAction;
 	// private UnityAction m_GameEndAction;
 
 	EventSource _EventSource;
@@ -62,13 +62,13 @@ public class ScoreKeeper {
     return binList.SuccessfulScoring();
 	}
 
-	void AddToScore(PresentList binList) {
+	public void AddToScore(PresentList binList) {
     AddToScore(binList.Score());
   }
 
-  void AddToScore(int points) {
+  public void AddToScore(int points) {
     Score += points;
-    roundScores[currentRound] += points;
+		_GameManager.AddScoreToRound(points);
   }
 
 	public void StartGame() {
