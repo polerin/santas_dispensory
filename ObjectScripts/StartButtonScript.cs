@@ -3,22 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-public class StartButtonScript : MonoBehaviour {
+using SMG.Coordination;
+using SMG.Santas.GameManagement;
 
-	protected GameManager GameManager;
+namespace SMG.Santas.ObjectScripts {
+	public class StartButtonScript : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+		protected GameManager GameManager;
 
-	}
+		// Use this for initialization
+		void Start () {
 
-	[Inject]
-	void Init(GameManager manager) {
-		this.GameManager = manager;
-	}
+		}
 
-	// Update is called once per frame
-	void Update () {
+		[Inject]
+		void Init(GameManager manager) {
+			this.GameManager = manager;
+		}
 
+		// Update is called once per frame
+		void Update () {
+
+		}
 	}
 }

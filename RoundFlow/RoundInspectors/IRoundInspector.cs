@@ -1,5 +1,5 @@
-namespace SMG.Santas.RoundFlow {
-  public interfaIRoundInspector {
-    
+namespace SMG.Santas.RoundFlow.RoundInspectors {
+  public interface IRoundInspector {
+
   }
 }

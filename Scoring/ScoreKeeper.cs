@@ -2,90 +2,97 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Scoring;
 
-public class ScoreKeeper {
+using SMG.Coordination;
+using SMG.Santas.GameManagement;
+using SMG.Santas.Scoring.ScoringStrategies;
+using SMG.Santas.ObjectScripts;
 
-	UnityAction m_GameStartAction;
-	// private UnityAction m_GameEndAction;
 
-	EventSource _EventSource;
-	GameManager _GameManager;
-	IScoringStrategy _ScoringStrategy;
+namespace SMG.Santas.Scoring {
+	public class ScoreKeeper {
 
-  int currentRound;
+		UnityAction m_GameStartAction;
+		// private UnityAction m_GameEndAction;
 
-	List<int> roundScores = new List<int>();
+		EventSource _EventSource;
+		GameManager _GameManager;
+		IScoringStrategy _ScoringStrategy;
 
-	private int _Score;
-	public int Score {
-		get { return _Score; }
-		protected set { _Score = value; }
-	}
+	  int currentRound;
 
-	/**
-	 * Constructor
-	 */
-	public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring, EventSource _EventSource) {
-		this._GameManager = GameManager;
-		this._ScoringStrategy = scoring;
+		List<int> roundScores = new List<int>();
 
-		_EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
-		// _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
-
-		// Register our StartGame() with our unity action.
-		this.m_GameStartAction += this.StartGame;
-		// this.m_GameEndAction += this.EndGame
-	}
-
-	~ScoreKeeper() {
-		if (_EventSource == null) {
-			return;
+		private int _Score;
+		public int Score {
+			get { return _Score; }
+			protected set { _Score = value; }
 		}
 
-		_EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
-		// _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
-	}
+		/**
+		 * Constructor
+		 */
+		public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring, EventSource _EventSource) {
+			this._GameManager = GameManager;
+			this._ScoringStrategy = scoring;
 
-	public bool ScoreBin(Collector subjectBin) {
-		if (!_GameManager.GameState()) {
-			return false;
+			_EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+			// _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+
+			// Register our StartGame() with our unity action.
+			this.m_GameStartAction += this.StartGame;
+			// this.m_GameEndAction += this.EndGame
 		}
 
-		PresentList binList = subjectBin.GetPresentList();
-		Dictionary<string, int> binContents = subjectBin.GetContentCount();
+		~ScoreKeeper() {
+			if (_EventSource == null) {
+				return;
+			}
 
-    _ScoringStrategy.ScoreList(binList, binContents);
-    AddToScore(binList);
-
-    // add bin checking logic
-    return binList.SuccessfulScoring();
-	}
-
-	public void AddToScore(PresentList binList) {
-    AddToScore(binList.Score());
-  }
-
-  public void AddToScore(int points) {
-    Score += points;
-		_GameManager.AddScoreToRound(points);
-  }
-
-	public void StartGame() {
-    Score = 0;
-	}
-
-  public void StartRound(int roundNumber) {
-		if (!_GameManager.GameState()) {
-			return;
+			_EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+			// _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 		}
 
-		if (roundScores.Count > roundNumber) {
-			roundScores[roundNumber] = 0;
-		} else {
-			roundScores.Insert(roundNumber, 0);
+		public bool ScoreBin(Collector subjectBin) {
+			if (!_GameManager.GameState()) {
+				return false;
+			}
+
+			PresentList binList = subjectBin.GetPresentList();
+			Dictionary<string, int> binContents = subjectBin.GetContentCount();
+
+	    _ScoringStrategy.ScoreList(binList, binContents);
+	    AddToScore(binList);
+
+	    // add bin checking logic
+	    return binList.SuccessfulScoring();
 		}
 
-		currentRound = roundNumber;
+		public void AddToScore(PresentList binList) {
+	    AddToScore(binList.Score());
+	  }
+
+	  public void AddToScore(int points) {
+	    Score += points;
+			_GameManager.AddScoreToRound(points);
+	  }
+
+		public void StartGame() {
+	    Score = 0;
+		}
+
+	  public void StartRound(int roundNumber) {
+			if (!_GameManager.GameState()) {
+				return;
+			}
+
+			if (roundScores.Count > roundNumber) {
+				roundScores[roundNumber] = 0;
+			} else {
+				roundScores.Insert(roundNumber, 0);
+			}
+
+			currentRound = roundNumber;
+		}
 	}
 }

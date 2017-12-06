@@ -1,162 +1,169 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Scoring;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class GameManager {
-	private bool gameOn = false;
+using SMG.Coordination;
+using SMG.Santas.Scoring;
+using SMG.Santas.Scoring.ScoringStrategies;
+using SMG.Santas.RoundFlow;
+using SMG.Santas.ObjectScripts;
 
-	// Issued to start the game.  (not issued by game manager)
-	public const string EVENT_GAMESTART = "game_start";
+namespace SMG.Santas.GameManagement {
+	public class GameManager {
+		private bool gameOn = false;
 
-	// Issued to signal that the game has just started
-	public const string EVENT_GAMESTART_AFTER = "game_start_after";
+		// Issued to start the game.  (not issued by game manager)
+		public const string EVENT_GAMESTART = "game_start";
 
-  // Issued to signal that the game is ending
-	public const string EVENT_GAMEEND = "game_end";
+		// Issued to signal that the game has just started
+		public const string EVENT_GAMESTART_AFTER = "game_start_after";
 
-	//Issued to signal that the game has just ended
-	public const string EVENT_GAMEEND_AFTER = "game_end_after";
+	  // Issued to signal that the game is ending
+		public const string EVENT_GAMEEND = "game_end";
 
-  // Notification that a round is about to start
-  public const string EVENT_ROUNDSTART = "round_start";
+		//Issued to signal that the game has just ended
+		public const string EVENT_GAMEEND_AFTER = "game_end_after";
 
-  // Notification that a round is about to end
-  public const string EVENT_ROUNDEND = "round_end";
+	  // Notification that a round is about to start
+	  public const string EVENT_ROUNDSTART = "round_start";
 
-  // Notification that an error is about to be added.
-  public const string EVENT_ERRORADDED = "round_error_add";
+	  // Notification that a round is about to end
+	  public const string EVENT_ROUNDEND = "round_end";
 
-  // Notification that the player has hit the maximum error count
-  public const string EVENT_MAXERRORS = "round_max_errors";
+	  // Notification that an error is about to be added.
+	  public const string EVENT_ERRORADDED = "round_error_add";
 
-	// Base Resource path where the game definition JSON files are stored.
-  private const string PATH_GAMEDEFINITION = "GameDefinitions/";
+	  // Notification that the player has hit the maximum error count
+	  public const string EVENT_MAXERRORS = "round_max_errors";
 
-	// Default json string returned if a Game Definition can't be loaded.
-  private const string DEFAULT_GAMEDEF = "{}";
+		// Base Resource path where the game definition JSON files are stored.
+	  private const string PATH_GAMEDEFINITION = "GameDefinitions/";
 
-	private UnityAction m_GameStartAction;
-	private UnityAction m_MaxErrorsAction;
+		// Default json string returned if a Game Definition can't be loaded.
+	  private const string DEFAULT_GAMEDEF = "{}";
 
-	protected ScoreboardDisplay ScoreBoard;
-	protected EventSource _EventSource;
+		private UnityAction m_GameStartAction;
+		private UnityAction m_MaxErrorsAction;
 
-	public GameDefinition CurrentGame { public get, protected set }
-	public RoundDefinition CurrentRound { public get, protected set }
+		protected ScoreboardDisplay ScoreBoard;
+		protected EventSource _EventSource;
 
-	/**
-	 * Constructor
-	 */
-	public GameManager (EventSource EventSource) {
-		InitMonitors();
-		_EventSource = EventSource;
+		public Game CurrentGame { get; protected set; }
+		public RoundDefinition CurrentRound { get; protected set; }
 
-		_EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
-		_EventSource.StartListening(RoundManager.EVENT_MAXERRORS, m_MaxErrorsAction);
+		/**
+		 * Constructor
+		 */
+		public GameManager (EventSource EventSource) {
+			InitMonitors();
+			_EventSource = EventSource;
 
-		// Register our StartGame() with our unity action.
-		m_GameStartAction += StartGame;
+			_EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
+			_EventSource.StartListening(GameManager.EVENT_MAXERRORS, m_MaxErrorsAction);
 
-		// Maybe later we need to have some more logic here, but not for now
-		m_MaxErrorsAction += EndGame;
-	}
+			// Register our StartGame() with our unity action.
+			m_GameStartAction += StartGame;
 
-  ~GameManager() {
-		_EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
-	}
-
-
-  public bool GameState() {
-		if (CurrentGame == null) {
-			return false;
+			// Maybe later we need to have some more logic here, but not for now
+			m_MaxErrorsAction += EndGame;
 		}
 
-    return CurrentGame.gameOn;
-  }
-
-  public void AddError() {
-    // @TODO figure out how to send back a cancel.  Exception?
-    _EventSource.TriggerEvent(GameManager.EVENT_ERRORADDED);
-
-    Errors += 1;
-
-    if (Errors >= maxErrors) {
-      _EventSource.TriggerEvent(GameManager.EVENT_MAXERRORS);
-    }
-  }
-
-	/* Game Lifecycle event management */
-
-	protected void StartGame() {
-		if (GameState()) {
-			Debug.Log("Attempting to start an already started game");
-			return;
+	  ~GameManager() {
+			_EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
 		}
 
-		CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
-		CurrentGame.gameOn = true;
 
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
+	  public bool GameState() {
+			if (CurrentGame == null) {
+				return false;
+			}
 
-		StartRound();
-	}
+	    return CurrentGame.gameOn;
+	  }
 
-  protected void EndGame() {
-		if (!GameState()) {
-			Denug.Log("Attempting to End an inactive game");
-			return;
+	  public void AddError() {
+	    // @TODO figure out how to send back a cancel.  Exception?
+	    _EventSource.TriggerEvent(GameManager.EVENT_ERRORADDED);
+
+	    CurrentGame.AddError();
+
+	    if (CurrentGame.AtMaxErrors()) {
+	      _EventSource.TriggerEvent(GameManager.EVENT_MAXERRORS);
+	    }
+	  }
+
+		/* Game Lifecycle event management */
+
+		protected void StartGame() {
+			if (GameState()) {
+				Debug.Log("Attempting to start an already started game");
+				return;
+			}
+
+			CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
+			CurrentGame.gameOn = true;
+
+			_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
+
+			StartRound();
 		}
 
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
-    CurrentGame.gameOn = false;
+	  protected void EndGame() {
+			if (!GameState()) {
+				Denug.Log("Attempting to End an inactive game");
+				return;
+			}
 
-		_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
-	}
+			_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
+	    CurrentGame.gameOn = false;
 
-	protected void StartRound() {
-    if (!GameState()) {
-      return;
-    }
-
-		CurrentGame.currentRound++;
-		CurrentRound = CurrentGame.Rounds[CurrentGame.currentRound];
-
-    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDSTART);
-	}
-
-	protected void EndRound() {
-    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDEND);
-	}
-
-
-	/* Mechanics and loading methods. */
-
-	protected void InitMonitors() {
-		if (Display.displays.Length <= 1) {
-			Debug.Log("Well that's odd, no real monitor");
-			return;
+			_EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
 		}
 
-		Display.displays[1].Activate();
+		protected void StartRound() {
+	    if (!GameState()) {
+	      return;
+	    }
+
+			CurrentGame.currentRound++;
+			CurrentRound = CurrentGame.Rounds[CurrentGame.currentRound];
+
+	    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDSTART);
+		}
+
+		protected void EndRound() {
+	    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDEND);
+		}
+
+
+		/* Mechanics and loading methods. */
+
+		protected void InitMonitors() {
+			if (Display.displays.Length <= 1) {
+				Debug.Log("Well that's odd, no real monitor");
+				return;
+			}
+
+			Display.displays[1].Activate();
+		}
+
+		protected Game LoadGameDefinition(GameTypes Type) {
+	    return JsonUtility.FromJson<GameDefinition>(LoadJson(Type));
+	  }
+
+	  protected string LoadJson(GameTypes Type) {
+			string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type) + ".json";
+	    TextAsset GameJson = (TextAsset) Resources.Load(ResourcePath);
+
+	    if (GameJson == null) {
+	      // throw something here?
+	      return GameManager.DEFAULT_GAMEDEF;
+	    }
+
+
+	    return GameJson.text;
+	  }
 	}
-
-	protected GameDefinition LoadGameDefinition(GameTypes Type) {
-    return JsonUtility.FromJson<GameDefinition>(LoadJson(Type));
-  }
-
-  protected string LoadJson(GameTypes Type) {
-		string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type) + ".json";
-    TextAsset GameJson = (TextAsset) Resources.Load(ResourcePath);
-
-    if (GameJson == null) {
-      // throw something here?
-      return GameManager.DEFAULT_GAMEDEF;
-    }
-
-
-    return GameJson.text;
-  }
 }

@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using Scoring;
 using UnityEngine;
 using UnityEngine.Events;
+
+using SMG.Santas.Scoring;
 
 namespace SMG.Coordination {
   /**

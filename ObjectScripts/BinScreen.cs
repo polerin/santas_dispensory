@@ -2,43 +2,48 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BinScreen : MonoBehaviour {
-	TextMesh display;
-
-	public string offText = "Bin Off!";
-	public string awayText = "Bin Away!";
-	public string waitingText = "Bin Waiting!";
+using SMG.Santas.Scoring;
 
 
-	// Use this for initialization
-	void Start () {
-		display = this.gameObject.GetComponent<TextMesh>();
-	}
+namespace SMG.Santas.ObjectScripts {
+	public class BinScreen : MonoBehaviour {
+		TextMesh display;
 
-	public void UpdateText(Collector bin) {
+		public string offText = "Bin Off!";
+		public string awayText = "Bin Away!";
+		public string waitingText = "Bin Waiting!";
 
-		if (!bin.State(bin.StateReady)) {
-			display.text = offText;
 
-		} else if (bin.State(bin.StateAway)){
-			display.text = awayText;
-
-		} else if (bin.State(bin.StateWaiting)) {
-			display.text = waitingText;
-
-		} else {
-			display.text = this.FormatList(bin.GetPresentList());
+		// Use this for initialization
+		void Start () {
+			display = this.gameObject.GetComponent<TextMesh>();
 		}
-	}
 
-	string FormatList(PresentList binList) {
-			Dictionary<string, int> counts = binList.Counts();
-			string result = "";
+		public void UpdateText(Collector bin) {
 
-			foreach (KeyValuePair<string, int> requirement in counts) {
-				result += requirement.Key + "\t" + requirement.Value + "\n";
+			if (!bin.State(bin.StateReady)) {
+				display.text = offText;
+
+			} else if (bin.State(bin.StateAway)){
+				display.text = awayText;
+
+			} else if (bin.State(bin.StateWaiting)) {
+				display.text = waitingText;
+
+			} else {
+				display.text = this.FormatList(bin.GetPresentList());
 			}
+		}
 
-			return result.Trim();
+		string FormatList(PresentList binList) {
+				Dictionary<string, int> counts = binList.Counts();
+				string result = "";
+
+				foreach (KeyValuePair<string, int> requirement in counts) {
+					result += requirement.Key + "\t" + requirement.Value + "\n";
+				}
+
+				return result.Trim();
+		}
 	}
 }

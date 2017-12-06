@@ -1,16 +1,17 @@
-using System.Collections;
+using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace SMG.Coordination.Pools {
 
   public class MultiPool<T> {
     // need a Dictionary and methods to select and call the add/remove.
-    private Dictionary<string, SimplePool> Pools = new Dictionary<string, SimplePool>();
+    private Dictionary<string, SimplePool<T>> Pools = new Dictionary<string, SimplePool<T>>();
 
     // @TODO use reflection to generate the correct default generator for a passed in Put/Get Object? Or just remove
     private Func<T> _defaultGenerator;
 
-    public MultiPool<T> (Func<T> generator) {
+    public MultiPool(Func<T> generator) {
       _defaultGenerator = generator;
     }
 
@@ -21,12 +22,10 @@ namespace SMG.Coordination.Pools {
     public void PutObject(string poolName, T Item) {
       SimplePool<T> TargetPool = null;
       if (!Pools.TryGetValue(poolName, out TargetPool)) {
-        TargetPool = new SimplePool<T>();
-        TargetPool.PutItem(Item):
-        Pools.Add(poolName, TargetPool);
-      } else {
-        TargetPool.PutObject(Item);
+        // @TODO exceptions
+        return;
       }
+      TargetPool.PutObject(Item);
     }
 
     public T GetObject(string poolName) {

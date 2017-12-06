@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 
 namespace SMG.Coordination.Pools {
@@ -5,7 +6,7 @@ namespace SMG.Coordination.Pools {
     protected ConcurrentBag<T> _CurrentItems;
     protected Func<T> _Generator;
 
-    public SimplePool<T>(Func<T> Generator) {
+    public SimplePool(Func<T> Generator) {
       _Generator = Generator;
       _CurrentItems = new ConcurrentBag<T>();
     }

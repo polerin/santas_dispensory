@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SMG.Santas.Scoring {
+namespace SMG.Santas.Scoring.ScoringStrategies {
   public class StandardScoring : IScoringStrategy {
     Dictionary<string, int> presentWorths = new Dictionary<string,int>()
     {
