@@ -6,14 +6,11 @@ using UnityEngine.Events;
 
 using SMG.Coordination;
 using SMG.Santas.Scoring;
-using SMG.Santas.Scoring.ScoringStrategies;
 using SMG.Santas.RoundFlow;
 using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.GameManagement {
 	public class GameManager {
-		private bool gameOn = false;
-
 		// Issued to start the game.  (not issued by game manager)
 		public const string EVENT_GAMESTART = "game_start";
 
@@ -112,7 +109,7 @@ namespace SMG.Santas.GameManagement {
 
 	  protected void EndGame() {
 			if (!GameState()) {
-				Denug.Log("Attempting to End an inactive game");
+				Debug.Log("Attempting to End an inactive game");
 				return;
 			}
 
@@ -130,11 +127,11 @@ namespace SMG.Santas.GameManagement {
 			CurrentGame.currentRound++;
 			CurrentRound = CurrentGame.Rounds[CurrentGame.currentRound];
 
-	    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDSTART);
+	    _EventSource.TriggerEvent(GameManager.EVENT_ROUNDSTART);
 		}
 
 		protected void EndRound() {
-	    _EventSource.TriggerEvent(RoundManager.EVENT_ROUNDEND);
+	    _EventSource.TriggerEvent(GameManager.EVENT_ROUNDEND);
 		}
 
 
@@ -150,7 +147,7 @@ namespace SMG.Santas.GameManagement {
 		}
 
 		protected Game LoadGameDefinition(GameTypes Type) {
-	    return JsonUtility.FromJson<GameDefinition>(LoadJson(Type));
+	    return JsonUtility.FromJson<Game>(LoadJson(Type));
 	  }
 
 	  protected string LoadJson(GameTypes Type) {

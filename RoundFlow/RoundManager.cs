@@ -6,14 +6,14 @@ using UnityEngine.Events;
 using SMG.Coordination;
 using SMG.Santas.Scoring;
 using SMG.Santas.RoundFlow;
-using SMG.Santas.RoundFlow.RoundInspectors;
 using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow {
 	public class RoundManager {
 		UnityAction m_GameStartAction;
-	  UnityAction m_GameEndAction;
+		UnityAction m_RoundStartAction;
+	  UnityAction m_RoundEndAction;
 
 	  public RoundDefinition CurrentRound { get; protected set; }
 	  IRoundInspector CurrentRoundInspector;
@@ -45,7 +45,7 @@ namespace SMG.Santas.RoundFlow {
 	    m_GameStartAction += StartRound;
 	    m_RoundEndAction += EndRound;
 
-	    for (int i = 0; i < RoundInspectors.Length(); i++) {
+	    for (int i = 0; i < RoundInspectors.Count; i++) {
 	      RoundInspectors[i].Inspect(this);
 	      _RoundInspectors.Add(RoundInspectors[i].Slug(), RoundInspectors[i]);
 	    }
@@ -59,7 +59,7 @@ namespace SMG.Santas.RoundFlow {
 	      return;
 	    }
 
-	    _EventSource.StopListening(GameManager.EVENT_ROUNDSTART_AFTER, m_RoundStartAction);
+	    _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, m_RoundStartAction);
 	    _EventSource.StopListening(GameManager.EVENT_GAMEEND, m_RoundEndAction);
 	    _EventSource.StopListening(GameManager.EVENT_ROUNDEND, m_RoundEndAction);
 	  }
@@ -103,6 +103,7 @@ namespace SMG.Santas.RoundFlow {
 	    DeactivateBins();
 	  }
 
+		// @TODO exception for default round manager not found
 	  protected void SetRoundManager(RoundDefinition Round) {
 	    IRoundInspector TargetInspector = null;
 
@@ -110,7 +111,7 @@ namespace SMG.Santas.RoundFlow {
 	      CurrentRoundInspector = TargetInspector;
 	    } else {
 	      Debug.Log("Round type not found in inspector list: " + Round.roundType);
-	      CurrentRoundInspector = _RoundInspectors.GetValue(defaultRoundType);
+	      CurrentRoundInspector = _RoundInspectors[defaultRoundType];
 	    }
 
 	    CurrentRoundInspector.Activate();

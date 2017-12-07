@@ -3,10 +3,8 @@ using Zenject;
 using SMG.Coordination;
 
 using SMG.Santas.Scoring;
-using SMG.Santas.Scoring.ScoringStrategies;
 using SMG.Santas.GameManagement;
 using SMG.Santas.RoundFlow;
-using SMG.Santas.RoundFlow.RoundInspectors;
 
 namespace SMG.Santas.Coordination {
   /**

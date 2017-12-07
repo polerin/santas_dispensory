@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 using SMG.Coordination;
 using SMG.Santas.GameManagement;
-using SMG.Santas.Scoring.ScoringStrategies;
+using SMG.Santas.Scoring;
 using SMG.Santas.ObjectScripts;
 
 
@@ -74,7 +74,7 @@ namespace SMG.Santas.Scoring {
 
 	  public void AddToScore(int points) {
 	    Score += points;
-			_GameManager.AddScoreToRound(points);
+			_GameManager.CurrentGame.AddScoreToRound(points);
 	  }
 
 		public void StartGame() {

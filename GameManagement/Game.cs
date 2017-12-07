@@ -20,6 +20,7 @@ namespace SMG.Santas.GameManagement {
 
     public int currentRound = 0;
     public int currentErrors = 0;
+    public int currentScore = 0;
 
     public bool gameOn = false;
 
@@ -31,6 +32,19 @@ namespace SMG.Santas.GameManagement {
 
     public bool AtMaxErrors() {
       return (currentErrors >= AllowedErrors);
+    }
+
+    public int AddScore(int points) {
+      return currentScore += points;
+    }
+
+    public int AddScoreToRound(int score) {
+      return AddScoreToRound(score, currentRound);
+    }
+
+    // @TODO rounds currently don't have scores, need to implement
+    public int AddScoreToRound(int score, int round) {
+      return 0;
     }
   }
 }

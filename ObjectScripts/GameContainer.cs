@@ -4,6 +4,8 @@ using UnityEngine;
 using Zenject;
 
 using SMG.Coordination;
+using SMG.Santas.GameManagement;
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.ObjectScripts {
 	public class GameContainer : MonoBehaviour {
