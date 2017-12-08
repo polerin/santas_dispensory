@@ -1,10 +1,17 @@
 namespace SMG.Santas.RoundFlow {
   public struct RoundDefinition {
     public string roundType;
-    public int listCount;
+    public string scoreType;
     public bool[] bins;
     public string[] dispensers;
 
-    public int? maxTime;
+    public int binCount;
+    public int errorCount;
+    public int score;
+
+    public int maxTime;
+    public int maxBins;
+    public int maxScore;
+    public int maxErrors;
   }
 }

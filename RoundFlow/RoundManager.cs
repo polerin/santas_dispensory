@@ -11,27 +11,38 @@ using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow {
 	public class RoundManager {
+		public const string EVENT_SCOREBIN = "round_scorebin";
+		public const string EVENT_SCOREBIN_AFTER = "round_scorebin_after";
+
 		UnityAction m_GameStartAction;
 		UnityAction m_RoundStartAction;
 	  UnityAction m_RoundEndAction;
 
-	  public RoundDefinition CurrentRound { get; protected set; }
+	  public RoundDefinition CurrentRound {
+			get { return _GameManager.CurrentRound; }
+			protected set {}
+		}
+
 	  IRoundInspector CurrentRoundInspector;
+		IScoringStrategy CurrentScoringStrategy;
 	  ScoreKeeper _ScoreKeeper;
 	  GameManager _GameManager;
 	  EventSource _EventSource;
 
 	  int maxErrors = 3;
 	  string defaultRoundType = "binCount";
+	  string defaultScoringType = "StandardScoring";
 
 	  Dictionary<string, IRoundInspector> _RoundInspectors = new Dictionary<string, IRoundInspector>();
+	  Dictionary<string, IScoringStrategy> _ScoringStrategies = new Dictionary<string, IScoringStrategy>();
 		List<Collector> knownBins = new List<Collector>();
 		List<Dispenser> knownDispensers = new List<Dispenser>();
 
 	  /**
 	   * Constructor
 	   */
-	  public RoundManager (GameManager Manager, ScoreKeeper Keeper, EventSource Source, List<IRoundInspector> RoundInspectors)
+	  public RoundManager (GameManager Manager, ScoreKeeper Keeper, EventSource Source,
+			List<IRoundInspector> RoundInspectors, List<IScoringStrategy> ScoringStrategies)
 	  {
 	    _GameManager = Manager;
 	    _ScoreKeeper = Keeper;
@@ -49,6 +60,10 @@ namespace SMG.Santas.RoundFlow {
 	      RoundInspectors[i].Inspect(this);
 	      _RoundInspectors.Add(RoundInspectors[i].Slug(), RoundInspectors[i]);
 	    }
+
+			for (int i = 0; i < ScoringStrategies.Count; i++) {
+				_ScoringStrategies.Add(ScoringStrategies[i].Slug(), ScoringStrategies[i]);
+			}
 	  }
 
 	  /**
@@ -91,6 +106,7 @@ namespace SMG.Santas.RoundFlow {
 	    RoundDefinition CurrentRound = _GameManager.CurrentRound;
 
 	    SetRoundManager(CurrentRound);
+			SetScoringStrategy(CurrentRound);
 	    ResetBins(CurrentRound);
 	    ActivateDispensers(CurrentRound);
 		}
@@ -116,6 +132,19 @@ namespace SMG.Santas.RoundFlow {
 
 	    CurrentRoundInspector.Activate();
 	  }
+
+		protected void SetScoringStrategy(RoundDefinition Round) {
+			IScoringStrategy TargetStrategy = null;
+
+			if (_ScoringStrategies.TryGetValue(Round.scoreType, out TargetStrategy)) {
+				CurrentScoringStrategy = TargetStrategy;
+			} else {
+				Debug.Log("Scoring type not found in strategy list: " + Round.scoreType);
+				CurrentScoringStrategy = _ScoringStrategies[defaultScoringType];
+			}
+
+			CurrentRoundInspector.Activate();
+		}
 
 	  /**
 	   * Activate the appropriate dispensers based on round definition.
@@ -145,12 +174,20 @@ namespace SMG.Santas.RoundFlow {
 	    }
 	  }
 
-	  public void ScoreBin(Collector subjectBin) {
-	    if (!_ScoreKeeper.ScoreBin(subjectBin)) {
-	      _GameManager.AddError();
-	    }
+	  public void ScoreBin(Collector SubjectBin) {
+			_EventSource.TriggerEvent(RoundManager.EVENT_SCOREBIN);
 
-	    subjectBin.Reset();
+			PresentList BinList = CurrentScoringStrategy.ScoreBin(SubjectBin);
+
+			_ScoreKeeper.AddToScore(BinList);
+
+			if (!BinList.SuccessfulScoring()) {
+				_GameManager.AddError();
+			}
+
+			_EventSource.TriggerEvent(RoundManager.EVENT_SCOREBIN_AFTER);
+
+	    SubjectBin.Reset();
 	  }
 	}
 }

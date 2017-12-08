@@ -57,14 +57,20 @@ namespace SMG.Santas.GameManagement {
 			InitMonitors();
 			_EventSource = EventSource;
 
-			_EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
-			_EventSource.StartListening(GameManager.EVENT_MAXERRORS, m_MaxErrorsAction);
-
 			// Register our StartGame() with our unity action.
-			m_GameStartAction += StartGame;
+			// m_GameStartAction += StartGame;
 
 			// Maybe later we need to have some more logic here, but not for now
-			m_MaxErrorsAction += EndGame;
+			// m_MaxErrorsAction += EndGame;
+			
+			// _EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
+			// _EventSource.StartListening(GameManager.EVENT_MAXERRORS, m_MaxErrorsAction);
+			_EventSource.StartListening(GameManager.EVENT_GAMESTART, StartGame);
+			_EventSource.StartListening(GameManager.EVENT_MAXERRORS, EndGame);
+			_EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_SUCCESS, EndRound);
+			_EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_FAILURE, EndGame);
+
+
 		}
 
 	  ~GameManager() {

@@ -64,8 +64,12 @@ namespace SMG.Santas.Scoring {
 	    _ScoringStrategy.ScoreList(binList, binContents);
 	    AddToScore(binList);
 
-	    // add bin checking logic
-	    return binList.SuccessfulScoring();
+			if (!binList.SuccessfulScoring()) {
+				_GameManager.AddError();
+				 return false;
+			}
+			
+	    return true;
 		}
 
 		public void AddToScore(PresentList binList) {

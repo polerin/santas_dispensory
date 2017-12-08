@@ -1,42 +1,33 @@
 using UnityEngine.Events;
 
 using SMG.Coordination;
-using SMG.Santas.RoundFlow;
 using SMG.Santas.Scoring;
 using SMG.Santas.GameManagement;
 
 namespace SMG.Santas.RoundFlow {
-  public class BinCountInspector : IRoundInspector {
-    UnityAction m_RoundStartAction;
-	  UnityAction m_RoundEndAction;
+  public class BinCountInspector : AbstractRoundInspector {
 
-    EventSource _EventSource;
-    RoundManager _RoundManager;
+    int maxBins;
 
-    public BinCountInspector (EventSource Source) {
-      this._EventSource = Source;
-
-      _EventSource.StopListening(GameManager.EVENT_ROUNDSTART, this.m_RoundStartAction);
-    }
-
-    ~BinCountInspector () {
-      _EventSource.StopListening(GameManager.EVENT_ROUNDSTART, this.m_RoundStartAction);
-    }
-
-    public string Slug () {
-      return "binCount";
-    }
-
-    public void Inspect(RoundManager Manager) {
-      this._RoundManager = Manager;
-    }
-
-    public void Activate() {
+    public BinCountInspector (EventSource Source, GameManager GameManager)
+      :base (Source, GameManager) {
 
     }
 
-    public void Deactivate() {
-      
+    public override void Activate() {
+      _EventSource.StartListening(RoundManager.EVENT_SCOREBIN_AFTER, HandleBinLimit);
+      // set the target bins
+      maxBins = _GameManager.CurrentRound.maxBins;
+    }
+
+    public override void Deactivate() {
+      _EventSource.StopListening(RoundManager.EVENT_SCOREBIN_AFTER, HandleBinLimit);
+    }
+
+    public void HandleBinLimit() {
+      if (_GameManager.CurrentRound.binCount >= maxBins) {
+          _EventSource.TriggerEvent(AbstractRoundInspector.EVENT_CONDITION_SUCCESS);
+      }
     }
   }
 }

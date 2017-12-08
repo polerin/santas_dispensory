@@ -5,7 +5,8 @@ using UnityEngine;
 using SMG.Santas.Scoring;
 
 namespace SMG.Santas.Scoring {
-  public class StandardScoring : IScoringStrategy {
+
+  public class StandardScoring : AbstractScoringStrategy {
     Dictionary<string, int> presentWorths = new Dictionary<string,int>()
     {
       {"present", 1},
@@ -14,7 +15,7 @@ namespace SMG.Santas.Scoring {
       {"ornament", 10}
     };
 
-    public void ScoreList(PresentList binList, Dictionary<string, int> binContents) {
+    public override PresentList ScoreList(PresentList binList, Dictionary<string, int> binContents) {
       Dictionary<string, int> targetCounts = binList.Counts();
       int listValue = 0;
       int binVal;
@@ -29,12 +30,14 @@ namespace SMG.Santas.Scoring {
         } else {
           binList.SuccessfulScoring(false);
           // Early exit when list scoring is not successful.
-          return;
+          return binList;
         }
       }
 
       binList.Score(listValue);
       binList.SuccessfulScoring(true);
+
+      return binList;
     }
   }
 }
