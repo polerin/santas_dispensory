@@ -18,7 +18,9 @@ namespace SMG.Santas.GameManagement {
 
     public RoundDefinition[] Rounds;
 
-    public int currentRound = 0;
+    public RoundDefinition CurrentRound;
+
+    public int currentRoundIndex = 0;
     public int currentErrors = 0;
     public int currentScore = 0;
 
@@ -39,12 +41,18 @@ namespace SMG.Santas.GameManagement {
     }
 
     public int AddScoreToRound(int score) {
-      return AddScoreToRound(score, currentRound);
+      return AddScoreToRound(score, currentRoundIndex);
     }
 
     // @TODO rounds currently don't have scores, need to implement
     public int AddScoreToRound(int score, int round) {
       return 0;
+    }
+
+    public void AdvanceRound() {
+      // if (CurrentRound == null) {
+      //   CurrentRound =
+      // }
     }
   }
 }

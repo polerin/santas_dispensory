@@ -58,11 +58,11 @@ namespace SMG.Santas.GameManagement {
 			_EventSource = EventSource;
 
 			// Register our StartGame() with our unity action.
-			// m_GameStartAction += StartGame;
+			m_GameStartAction += StartGame;
 
 			// Maybe later we need to have some more logic here, but not for now
 			// m_MaxErrorsAction += EndGame;
-			
+
 			// _EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
 			// _EventSource.StartListening(GameManager.EVENT_MAXERRORS, m_MaxErrorsAction);
 			_EventSource.StartListening(GameManager.EVENT_GAMESTART, StartGame);
@@ -74,7 +74,7 @@ namespace SMG.Santas.GameManagement {
 		}
 
 	  ~GameManager() {
-			_EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
+			// _EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
 		}
 
 
@@ -100,6 +100,7 @@ namespace SMG.Santas.GameManagement {
 		/* Game Lifecycle event management */
 
 		protected void StartGame() {
+			Debug.Log("GM Startgame");
 			if (GameState()) {
 				Debug.Log("Attempting to start an already started game");
 				return;
@@ -107,10 +108,10 @@ namespace SMG.Santas.GameManagement {
 
 			CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
 			CurrentGame.gameOn = true;
-
+Debug.Log(JsonUtility.ToJson(CurrentGame));
 			_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
 
-			StartRound();
+			// StartRound();
 		}
 
 	  protected void EndGame() {
@@ -130,8 +131,7 @@ namespace SMG.Santas.GameManagement {
 	      return;
 	    }
 
-			CurrentGame.currentRound++;
-			CurrentRound = CurrentGame.Rounds[CurrentGame.currentRound];
+			CurrentGame.AdvanceRound();
 
 	    _EventSource.TriggerEvent(GameManager.EVENT_ROUNDSTART);
 		}
@@ -157,7 +157,7 @@ namespace SMG.Santas.GameManagement {
 	  }
 
 	  protected string LoadJson(GameTypes Type) {
-			string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type) + ".json";
+			string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type);
 	    TextAsset GameJson = (TextAsset) Resources.Load(ResourcePath);
 
 	    if (GameJson == null) {

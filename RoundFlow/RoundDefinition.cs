@@ -3,7 +3,7 @@ namespace SMG.Santas.RoundFlow {
     public string roundType;
     public string scoreType;
     public bool[] bins;
-    public string[] dispensers;
+    public bool[] dispensers;
 
     public int binCount;
     public int errorCount;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +23,8 @@ namespace SMG.Coordination {
     public void StartListening(string eventName, UnityAction listener) {
       UnityEvent thisEvent = null;
 
+      Debug.Log("Registering " + eventName + " Listener");
+
       if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
         thisEvent.AddListener(listener);
       } else {
@@ -32,6 +35,7 @@ namespace SMG.Coordination {
     }
 
     public void StopListening(string eventName, UnityAction listener) {
+      Debug.Log("Removing " + eventName + " Listener");
       UnityEvent thisEvent = null;
       if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
           thisEvent.RemoveListener(listener);
@@ -45,9 +49,17 @@ namespace SMG.Coordination {
 
     public void TriggerEvent(string eventName) {
       UnityEvent thisEvent = null;
+
       if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
         Debug.Log("Triggering: " + eventName + " with no details" );
+
+        if (thisEvent == null) {
+          Debug.Log("Early Exit");
+          return;
+        }
+
         thisEvent.Invoke();
+        Debug.Log("after");
       }
     }
   }

@@ -36,7 +36,7 @@ namespace SMG.Santas.Scoring {
 			this._GameManager = GameManager;
 			this._ScoringStrategy = scoring;
 
-			_EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+			// _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
 			// _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 
 			// Register our StartGame() with our unity action.
@@ -53,25 +53,6 @@ namespace SMG.Santas.Scoring {
 			// _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 		}
 
-		public bool ScoreBin(Collector subjectBin) {
-			if (!_GameManager.GameState()) {
-				return false;
-			}
-
-			PresentList binList = subjectBin.GetPresentList();
-			Dictionary<string, int> binContents = subjectBin.GetContentCount();
-
-	    _ScoringStrategy.ScoreList(binList, binContents);
-	    AddToScore(binList);
-
-			if (!binList.SuccessfulScoring()) {
-				_GameManager.AddError();
-				 return false;
-			}
-			
-	    return true;
-		}
-
 		public void AddToScore(PresentList binList) {
 	    AddToScore(binList.Score());
 	  }
@@ -82,6 +63,7 @@ namespace SMG.Santas.Scoring {
 	  }
 
 		public void StartGame() {
+			Debug.Log("SK StartGame");
 	    Score = 0;
 		}
 

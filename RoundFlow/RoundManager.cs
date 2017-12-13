@@ -49,7 +49,7 @@ namespace SMG.Santas.RoundFlow {
 	    _EventSource = Source;
 
 	    // We want to come in after the GameManager has started the game
-	    _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, m_GameStartAction);
+	    // _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, m_GameStartAction);
 	    _EventSource.StartListening(GameManager.EVENT_GAMEEND, m_RoundEndAction);
 	    _EventSource.StartListening(GameManager.EVENT_ROUNDEND, m_RoundEndAction);
 
@@ -70,11 +70,12 @@ namespace SMG.Santas.RoundFlow {
 	   * Finalizer.  Clean up after ourselves.
 	   */
 	  ~RoundManager () {
+			Debug.Log("Roundmanager destructor");
 	    if (_EventSource == null) {
 	      return;
 	    }
 
-	    _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, m_RoundStartAction);
+	    // _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, StartRound);
 	    _EventSource.StopListening(GameManager.EVENT_GAMEEND, m_RoundEndAction);
 	    _EventSource.StopListening(GameManager.EVENT_ROUNDEND, m_RoundEndAction);
 	  }
@@ -99,6 +100,7 @@ namespace SMG.Santas.RoundFlow {
 	   * @type {[type]}
 	   */
 		protected void StartRound() {
+			Debug.Log("RM StartRound");
 	    if (!_GameManager.GameState()) {
 	      return;
 	    }
