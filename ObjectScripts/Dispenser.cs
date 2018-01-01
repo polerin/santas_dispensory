@@ -5,12 +5,16 @@ using UnityEngine.Events;
 using Zenject;
 
 using SMG.Coordination;
+using SMG.Coordination.Pools;
 using SMG.Santas.RoundFlow;
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.ObjectScripts {
 	public class Dispenser : MonoBehaviour {
-
-		public const string EVENT_PREFIX = "dispenser_send_";
+    public const string DISPENSE_BEAR = "dispenser_send_bear";
+    public const string DISPENSE_BALL = "dispenser_send_ball";
+    public const string DISPENSE_PRESENT = "dispenser_send_present";
+    public const string DISPENSE_HORSE = "dispenser_send_horse";
 
 		public float shootSpeed = 8.5f;
 		public float shootWindow = .5f;
@@ -21,43 +25,30 @@ namespace SMG.Santas.ObjectScripts {
 		public float aimSide = 0;
 		public float aimSideWindow = .5f;
 
+		// @TODO inject these
 		[SerializeField] ParticleSystem Particles;
 		[SerializeField] GameObject PlayerObj;
-		[SerializeField] GameObject bulletPrefab;
 
 		bool dispenserActive = false;
 
-		private UnityAction m_DispenseItem;
 		private RoundManager _RoundManager;
-		private EventSource _EventSource;
+		private MemoryPoolGroup<GameObject, CatchMeScript, CatchMeFactory, CatchMeScript.Pool> _ItemPools;
 
 
 		[Inject]
-		void Init(RoundManager Manager, EventSource EventSource)
+		void Init(
+			RoundManager Manager,
+			MemoryPoolGroup<GameObject, CatchMeScript, CatchMeFactory, CatchMeScript.Pool> ItemPools)
 		{
-			// Add our DispenseItem() to the unity action
-			m_DispenseItem += DispenseItem;
-
 			_RoundManager = Manager;
 			_RoundManager.Register(this);
-
-			_EventSource = EventSource;
-			_EventSource.StartListening(GetDispenseEventName(), m_DispenseItem);
+			_ItemPools = ItemPools;
 		}
 
 		void OnDestroy()
 		{
-			if (_EventSource == null) {
-				return;
-			}
-
-			_EventSource.StopListening(GetDispenseEventName(), m_DispenseItem);
+			// _RoundManager.Unregister(this);    //  Should we do something like this?
 		}
-
-		protected string GetDispenseEventName() {
-			return Dispenser.EVENT_PREFIX + bulletPrefab.GetComponent<CatchMeScript>().catchType;
-		}
-
 
 		public void Activate() {
 			dispenserActive = true;
@@ -68,30 +59,28 @@ namespace SMG.Santas.ObjectScripts {
 		}
 
 	  // public interface, negation logic and filtering should be here
-		public void  DispenseItem() {
+		public void  DispenseItem(GameObject Prefab) {
 			if (dispenserActive) {
-				SpawnItem();
+				SpawnItem(Prefab);
 			}
 		}
 
 		// spawns an item regardless of state
-		void SpawnItem()
+		void SpawnItem(GameObject Prefab)
 		{
 			Particles.Play();
-			//Instantiate/Create Bullet
-	    GameObject tempObj = Instantiate(bulletPrefab);
-			tempObj.transform.position = gameObject.transform.position;
+			CatchMeScript Item = _ItemPools.Spawn(Prefab);
 
-	    //Get the Rigidbody that is attached to that instantiated bullet
-	    Rigidbody projectile = tempObj.GetComponent<Rigidbody>();
-			Vector3 target = PlayerObj.transform.position - tempObj.transform.position;
-
+			Vector3 target = PlayerObj.transform.position - gameObject.transform.position;
 			target += getTargetVariance();
 
-	    //Shoot the Bullet
-			projectile.velocity = (target).normalized * Random.Range(shootSpeed - shootWindow, shootSpeed + shootWindow);
+			//figure out speed
+			Vector3 velocity = (target).normalized * Random.Range(shootSpeed - shootWindow, shootSpeed + shootWindow);
 
-	    // Destroy (clone.gameObject, 3);
+			Debug.Log(velocity);
+			// Set initial position and speed.
+			Item.SetInitial(gameObject.transform.position, velocity);
+			Item.MarkForDestroy();
 		}
 
 		Vector3 getTargetVariance() {

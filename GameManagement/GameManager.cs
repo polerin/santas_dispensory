@@ -41,14 +41,16 @@ namespace SMG.Santas.GameManagement {
 		// Default json string returned if a Game Definition can't be loaded.
 	  private const string DEFAULT_GAMEDEF = "{}";
 
-		private UnityAction m_GameStartAction;
-		private UnityAction m_MaxErrorsAction;
-
 		protected ScoreboardDisplay ScoreBoard;
 		protected EventSource _EventSource;
 
 		public Game CurrentGame { get; protected set; }
-		public RoundDefinition CurrentRound { get; protected set; }
+
+		public RoundDefinition CurrentRound {
+			get { return CurrentGame.CurrentRound; }
+			protected set {}
+		}
+
 
 		/**
 		 * Constructor
@@ -57,14 +59,6 @@ namespace SMG.Santas.GameManagement {
 			InitMonitors();
 			_EventSource = EventSource;
 
-			// Register our StartGame() with our unity action.
-			m_GameStartAction += StartGame;
-
-			// Maybe later we need to have some more logic here, but not for now
-			// m_MaxErrorsAction += EndGame;
-
-			// _EventSource.StartListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
-			// _EventSource.StartListening(GameManager.EVENT_MAXERRORS, m_MaxErrorsAction);
 			_EventSource.StartListening(GameManager.EVENT_GAMESTART, StartGame);
 			_EventSource.StartListening(GameManager.EVENT_MAXERRORS, EndGame);
 			_EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_SUCCESS, EndRound);
@@ -108,10 +102,10 @@ namespace SMG.Santas.GameManagement {
 
 			CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
 			CurrentGame.gameOn = true;
-Debug.Log(JsonUtility.ToJson(CurrentGame));
+
 			_EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
 
-			// StartRound();
+			StartRound();
 		}
 
 	  protected void EndGame() {
@@ -130,7 +124,6 @@ Debug.Log(JsonUtility.ToJson(CurrentGame));
 	    if (!GameState()) {
 	      return;
 	    }
-
 			CurrentGame.AdvanceRound();
 
 	    _EventSource.TriggerEvent(GameManager.EVENT_ROUNDSTART);

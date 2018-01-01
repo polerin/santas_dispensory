@@ -4,63 +4,60 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-using SMG.Santas.Scoring;
+using SMG.Santas.Events;
 
 namespace SMG.Coordination {
   /**
    * Central Point for messaging.
-   * @TODO Add credit for basis
    * @type {Dictionary}
    */
   public class EventSource {
 
-    private Dictionary<string, UnityEvent> eventDictionary;
+    private Dictionary<string, object> eventDictionary;
 
     public EventSource() {
-      eventDictionary = new Dictionary<string, UnityEvent>();
+      eventDictionary = new Dictionary<string, object>();
+    }
+
+    public void AddEvent<EventClass>(EventClass NewEvent) where EventClass : ISluggableEvent {
+      eventDictionary.Add(NewEvent.Slug(), NewEvent);
     }
 
     public void StartListening(string eventName, UnityAction listener) {
       UnityEvent thisEvent = null;
 
-      Debug.Log("Registering " + eventName + " Listener");
-
-      if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
-        thisEvent.AddListener(listener);
-      } else {
+      if (!GetEvent(eventName, out thisEvent)) {
         thisEvent = new UnityEvent();
-        thisEvent.AddListener(listener);
         this.eventDictionary.Add(eventName, thisEvent);
       }
+
+      thisEvent.AddListener(listener);
     }
 
     public void StopListening(string eventName, UnityAction listener) {
-      Debug.Log("Removing " + eventName + " Listener");
       UnityEvent thisEvent = null;
-      if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
-          thisEvent.RemoveListener(listener);
+
+      if (GetEvent(eventName, out thisEvent)) {
+        thisEvent.RemoveListener(listener);
       }
     }
-
-
-    /**
-     * Overloading these because the UnityEvent itself is overloaded.
-     */
 
     public void TriggerEvent(string eventName) {
       UnityEvent thisEvent = null;
 
-      if (this.eventDictionary.TryGetValue(eventName, out thisEvent)) {
-        Debug.Log("Triggering: " + eventName + " with no details" );
-
-        if (thisEvent == null) {
-          Debug.Log("Early Exit");
-          return;
-        }
-
+      if (GetEvent(eventName, out thisEvent)) {
         thisEvent.Invoke();
-        Debug.Log("after");
       }
+    }
+
+    private bool GetEvent<EventClass>(string eventName, out EventClass FoundEvent) where EventClass : UnityEventBase {
+      if (eventDictionary.ContainsKey(eventName)) {
+        FoundEvent = (EventClass)eventDictionary[eventName];
+        return true;
+      }
+
+      FoundEvent = null;
+      return false;
     }
   }
 }

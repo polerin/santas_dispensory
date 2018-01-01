@@ -19,21 +19,17 @@ namespace SMG.Santas.RoundFlow {
     protected RoundManager _RoundManager;
     protected GameManager _GameManager;
 
-    protected string inspectorSlug = "Abstract";
-
     public AbstractRoundInspector (EventSource Source, GameManager GameManager) {
       this._EventSource = Source;
       this._GameManager = GameManager;
     }
 
-    public string Slug () {
-      return inspectorSlug;
-    }
 
     public void Inspect(RoundManager Manager) {
       this._RoundManager = Manager;
     }
 
+    public abstract string Slug();
     public abstract void Activate();
     public abstract void Deactivate();
 

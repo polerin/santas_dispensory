@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
@@ -8,7 +8,7 @@ using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.ObjectScripts {
-	public class GameContainer : MonoBehaviour {
+	public class InputManager : MonoBehaviour {
 
 		private EventSource _EventSource;
 
@@ -29,7 +29,6 @@ namespace SMG.Santas.ObjectScripts {
 			if (Input.GetKeyDown(KeyCode.Keypad1)) {
 				this._EventSource.TriggerEvent(Dispenser.DISPENSE_BEAR);
 			}
-
 
 			if (Input.GetKeyDown(KeyCode.Keypad2)) {
 				this._EventSource.TriggerEvent(Dispenser.DISPENSE_BALL);

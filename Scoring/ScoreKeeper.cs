@@ -10,16 +10,15 @@ using SMG.Santas.ObjectScripts;
 
 
 namespace SMG.Santas.Scoring {
+
+	// @TODO Rework this as a "Top Score"
 	public class ScoreKeeper {
 
-		UnityAction m_GameStartAction;
+		// UnityAction m_GameStartAction;
 		// private UnityAction m_GameEndAction;
 
 		EventSource _EventSource;
 		GameManager _GameManager;
-		IScoringStrategy _ScoringStrategy;
-
-	  int currentRound;
 
 		List<int> roundScores = new List<int>();
 
@@ -32,15 +31,14 @@ namespace SMG.Santas.Scoring {
 		/**
 		 * Constructor
 		 */
-		public ScoreKeeper(GameManager GameManager, IScoringStrategy scoring, EventSource _EventSource) {
+		public ScoreKeeper(GameManager GameManager, EventSource _EventSource) {
 			this._GameManager = GameManager;
-			this._ScoringStrategy = scoring;
 
 			// _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
 			// _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 
 			// Register our StartGame() with our unity action.
-			this.m_GameStartAction += this.StartGame;
+			// this.m_GameStartAction += this.StartGame;
 			// this.m_GameEndAction += this.EndGame
 		}
 
@@ -49,7 +47,7 @@ namespace SMG.Santas.Scoring {
 				return;
 			}
 
-			_EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+			// _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
 			// _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 		}
 
@@ -78,7 +76,6 @@ namespace SMG.Santas.Scoring {
 				roundScores.Insert(roundNumber, 0);
 			}
 
-			currentRound = roundNumber;
 		}
 	}
 }

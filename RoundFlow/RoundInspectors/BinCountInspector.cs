@@ -10,8 +10,10 @@ namespace SMG.Santas.RoundFlow {
     int maxBins;
 
     public BinCountInspector (EventSource Source, GameManager GameManager)
-      :base (Source, GameManager) {
+      :base (Source, GameManager) {}
 
+    public override string Slug () {
+      return "binCount";
     }
 
     public override void Activate() {

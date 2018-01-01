@@ -1,4 +1,5 @@
 using SMG.Santas.RoundFlow;
+using SMG.Santas.Scoring;
 
 namespace SMG.Santas.GameManagement {
   //@TODO Serializable
@@ -36,6 +37,10 @@ namespace SMG.Santas.GameManagement {
       return (currentErrors >= AllowedErrors);
     }
 
+    public int AddScore(PresentList binList) {
+      return AddScore(binList.Score());
+    }
+
     public int AddScore(int points) {
       return currentScore += points;
     }
@@ -49,10 +54,21 @@ namespace SMG.Santas.GameManagement {
       return 0;
     }
 
-    public void AdvanceRound() {
-      // if (CurrentRound == null) {
-      //   CurrentRound =
-      // }
+    // @todo make this not a nasty stub.
+    public Game AdvanceRound() {
+      CurrentRound = GenerateStubRoundDefinition();
+      return this;
+    }
+
+    protected RoundDefinition GenerateStubRoundDefinition() {
+      RoundDefinition Stub = new RoundDefinition();
+      Stub.roundType = "binCount";
+      Stub.scoreType = "StandardScoring";
+      Stub.bins = new bool[] {true, true};
+      Stub.dispensers = new bool[] {false, true, true, false, false};
+      Stub.maxBins = 5;
+
+      return Stub;
     }
   }
 }
