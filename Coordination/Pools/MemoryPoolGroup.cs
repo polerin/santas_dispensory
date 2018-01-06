@@ -4,7 +4,8 @@ using UnityEngine;
 using Zenject;
 
 // Sligtly more reusable version of https://groups.google.com/forum/#!topic/zenject/4LqbdssSIYs
-namespace SMG.Coordination.Pools {
+namespace SMG.Coordination.Pools
+{
 
   // @TODO rework this to support multi param pools?
 
@@ -17,7 +18,7 @@ namespace SMG.Coordination.Pools {
     readonly DiContainer _Container;
 
     readonly Dictionary<TKey, TPool> Pools = new Dictionary<TKey, TPool>();
-    public MemoryPoolGroup (DiContainer Container, MemoryPoolSettings Settings)
+    public MemoryPoolGroup(DiContainer Container, MemoryPoolSettings Settings)
     {
       _Settings = Settings;
       _Container = Container;
@@ -51,7 +52,7 @@ namespace SMG.Coordination.Pools {
     {
       // LATER.
       return _Container.Instantiate<TPool>(
-        new object[] {_Settings, _Container.Instantiate<TFactory>(new object[] {poolKey, _Container})}
+        new object[] { _Settings, _Container.Instantiate<TFactory>(new object[] { poolKey, _Container }) }
       );
     }
   }

@@ -1,9 +1,11 @@
 using SMG.Santas.RoundFlow;
 using SMG.Santas.Scoring;
 
-namespace SMG.Santas.GameManagement {
+namespace SMG.Santas.GameManagement
+{
   //@TODO Serializable
-  public class Game {
+  public class Game
+  {
     // Solo or co-op (for now?)
     public string GameStyle = "co-op";
 
@@ -27,45 +29,53 @@ namespace SMG.Santas.GameManagement {
 
     public bool gameOn = false;
 
-    public int AddError() {
+    public int AddError()
+    {
       currentErrors++;
 
       return currentErrors;
     }
 
-    public bool AtMaxErrors() {
+    public bool AtMaxErrors()
+    {
       return (currentErrors >= AllowedErrors);
     }
 
-    public int AddScore(PresentList binList) {
+    public int AddScore(PresentList binList)
+    {
       return AddScore(binList.Score());
     }
 
-    public int AddScore(int points) {
+    public int AddScore(int points)
+    {
       return currentScore += points;
     }
 
-    public int AddScoreToRound(int score) {
+    public int AddScoreToRound(int score)
+    {
       return AddScoreToRound(score, currentRoundIndex);
     }
 
     // @TODO rounds currently don't have scores, need to implement
-    public int AddScoreToRound(int score, int round) {
+    public int AddScoreToRound(int score, int round)
+    {
       return 0;
     }
 
     // @todo make this not a nasty stub.
-    public Game AdvanceRound() {
+    public Game AdvanceRound()
+    {
       CurrentRound = GenerateStubRoundDefinition();
       return this;
     }
 
-    protected RoundDefinition GenerateStubRoundDefinition() {
+    protected RoundDefinition GenerateStubRoundDefinition()
+    {
       RoundDefinition Stub = new RoundDefinition();
       Stub.roundType = "binCount";
       Stub.scoreType = "StandardScoring";
-      Stub.bins = new bool[] {true, true};
-      Stub.dispensers = new bool[] {false, true, true, false, false};
+      Stub.bins = new bool[] { true, true };
+      Stub.dispensers = new bool[] { false, true, true, false, false };
       Stub.maxBins = 5;
 
       return Stub;

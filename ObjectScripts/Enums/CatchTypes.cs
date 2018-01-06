@@ -1,5 +1,7 @@
-namespace SMG.Santas.ObjectScripts {
-  public enum CatchTypes {
+namespace SMG.Santas.ObjectScripts
+{
+  public enum CatchTypes
+  {
     Bear,
     Ball,
     Present,

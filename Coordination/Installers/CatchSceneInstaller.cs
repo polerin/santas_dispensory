@@ -11,17 +11,20 @@ using SMG.Santas.ObjectScripts;
 
 using UnityEngine.Events;
 
-namespace SMG.Santas.Coordination {
+namespace SMG.Santas.Coordination
+{
   /**
    * This is the zenject catchscene dependency injection mapping
    */
-  public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller> {
+  public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller>
+  {
     [SerializeField]
     private MemoryPoolSettings CatchMePoolSettings;
     [SerializeField]
     private RoundManager.Settings RoundManagerSettings;
 
-    public override void InstallBindings() {
+    public override void InstallBindings()
+    {
       Container.Bind<IScoringStrategy>().To<StandardScoring>().AsCached();
 
       Container.Bind<PresentList>().AsTransient();

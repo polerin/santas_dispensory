@@ -2,28 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using VRTK;
 
-namespace SMG.Santas.ObjectScripts {
-  public class CatchMeScript : MonoBehaviour {
+namespace SMG.Santas.ObjectScripts
+{
+  public class CatchMeScript : MonoBehaviour
+  {
     // @TODO make this an enum
     public string catchType;
 
     public float objectLife = 5;
     private bool isCollected = false;
+    private bool isHeld = false;
 
     private IEnumerator destruction;
     private Rigidbody projectile;
     private Pool _Pool;
 
-    public void MarkForDestroy() {
-      destruction = DestructionCheck();
-      StartCoroutine(destruction);
+
+    protected void Start()
+    {
+      gameObject.GetComponet<VRTK_InteractableObject>();
     }
 
-    protected void Start() {
-    }
-
-    protected void SetPool(Pool Pool) {
+    protected void SetPool(Pool Pool)
+    {
       _Pool = Pool;
     }
 
@@ -45,6 +48,18 @@ namespace SMG.Santas.ObjectScripts {
       projectile.velocity = velocity;
     }
 
+    public void MarkHeld()
+    {
+      isHeld = true;
+      MarkStayAlive();
+    }
+
+    public void MarkNotHeld()
+    {
+      isHeld = false;
+      MarkForDestroy();
+    }
+
     public void MarkCollectedBy(Collector Container)
     {
       isCollected = true;
@@ -57,6 +72,17 @@ namespace SMG.Santas.ObjectScripts {
       MarkForDestroy();
     }
 
+    void MarkStayAlive()
+    {
+      StopCoroutine(destruction);
+    }
+
+    public void MarkForDestroy()
+    {
+      destruction = DestructionCheck();
+      StartCoroutine(destruction);
+    }
+
     public void GoAway(bool showAnimation = false)
     {
       if (_Pool == null) {
@@ -66,16 +92,10 @@ namespace SMG.Santas.ObjectScripts {
       }
     }
 
-    void MarkStayAlive()
-    {
-      StopCoroutine(destruction);
-    }
-
-
-    IEnumerator DestructionCheck()
+    IEnumerator DestructionCheck(int )
     {
       yield return new WaitForSecondsRealtime(objectLife);
-      if (isCollected == false) {
+      if (isCollected == false && isHeld == false) {
         GoAway(true);
       }
     }

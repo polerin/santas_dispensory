@@ -4,10 +4,12 @@ using UnityEngine;
 
 using SMG.Santas.Scoring;
 
-namespace SMG.Santas.Scoring {
+namespace SMG.Santas.Scoring
+{
 
-  public class StandardScoring : AbstractScoringStrategy {
-    Dictionary<string, int> presentWorths = new Dictionary<string,int>()
+  public class StandardScoring : AbstractScoringStrategy
+  {
+    Dictionary<string, int> presentWorths = new Dictionary<string, int>()
     {
       {"present", 1},
       {"horse", 2},
@@ -15,7 +17,8 @@ namespace SMG.Santas.Scoring {
       {"ornament", 10}
     };
 
-    public override PresentList ScoreList(PresentList binList, Dictionary<string, int> binContents) {
+    public override PresentList ScoreList(PresentList binList, Dictionary<string, int> binContents)
+    {
       Dictionary<string, int> targetCounts = binList.Counts();
       int listValue = 0;
       int binVal;

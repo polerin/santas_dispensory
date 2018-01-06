@@ -1,4 +1,5 @@
-public enum GameTypes {
+public enum GameTypes
+{
   StandardEasy,
   StandardNormal,
   StandardHard,

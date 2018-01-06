@@ -1,5 +1,7 @@
-namespace SMG.Santas.RoundFlow {
-  public struct RoundDefinition {
+namespace SMG.Santas.RoundFlow
+{
+  public struct RoundDefinition
+  {
     public string roundType;
     public string scoreType;
     public bool[] bins;

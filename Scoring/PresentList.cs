@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SMG.Santas.Scoring {
-  public class PresentList {
+namespace SMG.Santas.Scoring
+{
+  public class PresentList
+  {
     Dictionary<string, int> presentCounts = new Dictionary<string, int>();
 
     private int maxCount = 3;
@@ -12,7 +14,8 @@ namespace SMG.Santas.Scoring {
     private int lastScoreValue = 0;
     private bool lastScoreSuccessful = false;
 
-    public PresentList() {
+    public PresentList()
+    {
       // init our counts
       this.presentCounts.Add("horse", 0);
       this.presentCounts.Add("bear", 0);
@@ -23,7 +26,8 @@ namespace SMG.Santas.Scoring {
       this.MarkStart();
     }
 
-    public void GenerateRandomCounts() {
+    public void GenerateRandomCounts()
+    {
       Dictionary<string, int> temp = new Dictionary<string, int>();
 
       foreach (string key in presentCounts.Keys) {
@@ -35,46 +39,54 @@ namespace SMG.Santas.Scoring {
       }
     }
 
-    public void SetTypeCount(string type, int count) {
+    public void SetTypeCount(string type, int count)
+    {
       if (!this.presentCounts.ContainsKey(type)) {
         return;
       }
 
       if (count < this.minCount) {
         count = this.minCount;
-      } else if (count > maxCount){
+      } else if (count > maxCount) {
         count = this.maxCount;
       }
 
       this.presentCounts[type] = count;
     }
 
-    public Dictionary<string, int> Counts() {
+    public Dictionary<string, int> Counts()
+    {
       return new Dictionary<string, int>(presentCounts);
     }
 
-    public void Duration() {
+    public void Duration()
+    {
 
     }
 
 
-    public bool SuccessfulScoring() {
+    public bool SuccessfulScoring()
+    {
       return this.lastScoreSuccessful;
     }
 
-    public void SuccessfulScoring(bool success) {
+    public void SuccessfulScoring(bool success)
+    {
       this.lastScoreSuccessful = success;
     }
 
-    public int Score() {
+    public int Score()
+    {
       return this.lastScoreValue;
     }
 
-    public void Score(int incomingScore) {
+    public void Score(int incomingScore)
+    {
       this.lastScoreValue = incomingScore;
     }
 
-    public void SetMaxCount(int newMax) {
+    public void SetMaxCount(int newMax)
+    {
       if (newMax <= this.minCount) {
         newMax = this.minCount + 1;
       }
@@ -82,7 +94,8 @@ namespace SMG.Santas.Scoring {
       this.maxCount = newMax;
     }
 
-    public void SetMinCount(int newMin) {
+    public void SetMinCount(int newMin)
+    {
       if (newMin < 0) {
         newMin = 0;
       }
@@ -94,7 +107,7 @@ namespace SMG.Santas.Scoring {
       this.minCount = 0;
     }
 
-    void MarkStart() {}
-    void MarkEnd() {}
+    void MarkStart() { }
+    void MarkEnd() { }
   }
 }

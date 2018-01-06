@@ -6,24 +6,29 @@ using Zenject;
 using SMG.Coordination;
 using SMG.Santas.GameManagement;
 
-namespace SMG.Santas.ObjectScripts {
-	public class StartButtonScript : MonoBehaviour {
+namespace SMG.Santas.ObjectScripts
+{
+  public class StartButtonScript : MonoBehaviour
+  {
 
-		protected GameManager GameManager;
+    protected GameManager GameManager;
 
-		// Use this for initialization
-		void Start () {
+    // Use this for initialization
+    void Start()
+    {
 
-		}
+    }
 
-		[Inject]
-		void Init(GameManager manager) {
-			this.GameManager = manager;
-		}
+    [Inject]
+    void Init(GameManager manager)
+    {
+      this.GameManager = manager;
+    }
 
-		// Update is called once per frame
-		void Update () {
+    // Update is called once per frame
+    void Update()
+    {
 
-		}
-	}
+    }
+  }
 }
