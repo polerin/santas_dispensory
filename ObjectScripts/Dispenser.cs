@@ -82,7 +82,6 @@ namespace SMG.Santas.ObjectScripts
       //figure out speed
       Vector3 velocity = (target).normalized * Random.Range(shootSpeed - shootWindow, shootSpeed + shootWindow);
 
-      Debug.Log(velocity);
       // Set initial position and speed.
       Item.SetInitial(gameObject.transform.position, velocity);
       Item.MarkForDestroy();

@@ -6,24 +6,17 @@ using VRTK;
 
 namespace SMG.Santas.ObjectScripts
 {
-  public class CatchMeScript : MonoBehaviour
+  public class CatchMeScript : VRTK_InteractableObject
   {
     // @TODO make this an enum
     public string catchType;
 
     public float objectLife = 5;
     private bool isCollected = false;
-    private bool isHeld = false;
 
     private IEnumerator destruction;
     private Rigidbody projectile;
     private Pool _Pool;
-
-
-    protected void Start()
-    {
-      gameObject.GetComponet<VRTK_InteractableObject>();
-    }
 
     protected void SetPool(Pool Pool)
     {
@@ -48,15 +41,13 @@ namespace SMG.Santas.ObjectScripts
       projectile.velocity = velocity;
     }
 
-    public void MarkHeld()
+    public void Grabbed(GameObject GrabbedBy)
     {
-      isHeld = true;
       MarkStayAlive();
     }
 
-    public void MarkNotHeld()
+    public void UnGrabbed(GameObject ReleasedBy)
     {
-      isHeld = false;
       MarkForDestroy();
     }
 
@@ -92,10 +83,10 @@ namespace SMG.Santas.ObjectScripts
       }
     }
 
-    IEnumerator DestructionCheck(int )
+    IEnumerator DestructionCheck()
     {
       yield return new WaitForSecondsRealtime(objectLife);
-      if (isCollected == false && isHeld == false) {
+      if (isCollected == false && !IsGrabbed()) {
         GoAway(true);
       }
     }
