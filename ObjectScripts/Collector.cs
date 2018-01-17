@@ -2,51 +2,64 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using VRTK.Controllables;
+using VRTK.Controllables.ArtificialBased;
+
 
 using SMG.Santas.Scoring;
 using SMG.Santas.RoundFlow;
+using System;
 
 namespace SMG.Santas.ObjectScripts
 {
   public class Collector : MonoBehaviour
   {
-    [SerializeField] private GameObject ScreenTextObject;
-    [SerializeField] private GameObject ScoreTrigger;
-    // public GameObject ScreenTextObj;
+    [SerializeField, Tooltip("When it hits MaxRotation, this rotator signals that the bin should be scored.")]
+    private VRTK_ArtificialRotator SendIndicator;
+
+    [SerializeField, Tooltip("This controls the display shown for the bin")]
     private BinScreen Screen;
-
-
-    // initial state is "off" (StateOff)
+    
+    /// <summary>
+    /// initial state is "off" (StateOff)
+    /// @TODO this is bad and should be an ENUM if anything
+    /// </summary>
     private int binState = 0;
 
     public readonly int StateReady = 1;
     public readonly int StateAway = 2;
     public readonly int StateWaiting = 4;
 
+    /// <summary>
+    /// The Roundmanager is responsible for controlling all of the prefabs in the scene
+    /// </summary>
     private RoundManager _RoundManager;
 
-    // the current list of items desired
+    /// <summary>
+    /// The Current list of needed items
+    /// </summary>
     private PresentList currentList;
 
-    // Known GameObjects that are currently in the collider
+    /// <summary>
+    /// GameObjects that are currently in the collider
+    /// </summary>
     private List<CatchMeScript> contents = new List<CatchMeScript>();
-
-    void Start()
-    {
-      Screen = ScreenTextObject.GetComponent<BinScreen>();
-      // BinLever = BinLeverObject.GetComponent<NVRLever>();
-
-    }
 
     [Inject]
     void Init(RoundManager Manager, PresentList List)
     {
+      SendIndicator.MaxLimitReached += LidClosed;
       this._RoundManager = Manager;
       this._RoundManager.Register(this);
 
       this.AddPresentList(List);
+    }
 
-      this.ScoreTrigger.GetComponent<ScoreTrigger>().OnTriggerScoring += this.RedeemList;
+    private void LidClosed(object Sender, ControllableEventArgs Event)
+    {
+      Debug.Log("Lid closed!");
+      RedeemList();
+      // Play Score particle
     }
 
     public void AddPresentList(PresentList newList)
@@ -145,6 +158,10 @@ namespace SMG.Santas.ObjectScripts
       otherScript.MarkNotCollectedBy(this);
     }
 
+    /// <summary>
+    /// Send the bin to the RoundManager to be scored
+    /// @TODO make this return a bool for partical usage?
+    /// </summary>
     void RedeemList()
     {
       if (!this.CanAccept()) {

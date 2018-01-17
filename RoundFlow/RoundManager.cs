@@ -17,30 +17,78 @@ namespace SMG.Santas.RoundFlow
     public const string EVENT_SCOREBIN = "round_scorebin";
     public const string EVENT_SCOREBIN_AFTER = "round_scorebin_after";
 
-    UnityAction<int> DispenseAction;
-
+    /// <summary>
+    /// Definition for the current round, passes through to _GameManager
+    /// </summary>
     public RoundDefinition CurrentRound {
       get { return _GameManager.CurrentRound; }
       protected set { }
     }
 
+    /// <summary>
+    /// Current Round Inspector, constructed from round definition
+    /// </summary>
     IRoundInspector CurrentRoundInspector;
+
+    /// <summary>
+    /// Current Scoring Strategy, constructed from round definition
+    /// </summary>
     IScoringStrategy CurrentScoringStrategy;
+
+    /// <summary>
+    /// Injected game manager.
+    /// </summary>
     GameManager _GameManager;
+
+    /// <summary>
+    /// Inject Event bus
+    /// </summary>
     EventSource _EventSource;
+
+    /// <summary>
+    /// Injected configuration.  This is used for prefab fetching
+    /// </summary>
     Settings _Settings;
 
+    /// <summary>
+    /// Default round type, must exist in _RoundInspectors
+    /// </summary>
     string defaultRoundType = "binCount";
+
+    /// <summary>
+    /// Default scoring strategy, must exist in _ScoringStrategies
+    /// </summary>
     string defaultScoringType = "StandardScoring";
 
+    /// <summary>
+    /// Round inspectors by name, for different round types.
+    /// </summary>
     Dictionary<string, IRoundInspector> _RoundInspectors = new Dictionary<string, IRoundInspector>();
+
+    /// <summary>
+    /// Scoring strategies by name, for different round types
+    /// </summary>
     Dictionary<string, IScoringStrategy> _ScoringStrategies = new Dictionary<string, IScoringStrategy>();
+
+    /// <summary>
+    /// List of known present bins.  Filled by Register() calls
+    /// </summary>
     List<Collector> knownBins = new List<Collector>();
+
+    /// <summary>
+    /// List of known present dispensers.  Filled by Register() calls
+    /// </summary>
     List<Dispenser> knownDispensers = new List<Dispenser>();
 
-    /**
-	   * Constructor
-	   */
+
+    /// <summary>
+    /// Constructor injection, sets up some game cycle listeners
+    /// </summary>
+    /// <param name="Manager">Game Manager</param>
+    /// <param name="Source">Event Source</param>
+    /// <param name="RoundInspectors">List of Round Inspectors, defined in the Installer</param>
+    /// <param name="ScoringStrategies">List of Scoring Strategies, defined in the Installer</param>
+    /// <param name="Settings">Settings object, sourced in the Installer, set in the inspector</param>
     public RoundManager(
       GameManager Manager,
       EventSource Source,
@@ -72,9 +120,9 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
-    /**
-	   * Finalizer.  Clean up after ourselves.
-	   */
+    /// <summary>
+    /// Destructor, unregister listeners if the eventsource still exists.
+    /// </summary>
     ~RoundManager()
     {
       Debug.Log("Roundmanager destructor");
@@ -92,6 +140,10 @@ namespace SMG.Santas.RoundFlow
       _EventSource.StopListening(Dispenser.DISPENSE_BEAR, DispenseHorse);
     }
 
+    /// <summary>
+    /// Register a collection bin so we can manage it later
+    /// </summary>
+    /// <param name="subjectBin"></param>
     public void Register(Collector subjectBin)
     {
       if (!knownBins.Contains(subjectBin)) {
@@ -99,6 +151,11 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
+
+    /// <summary>
+    /// Register a present dispenser so we can manage it later
+    /// </summary>
+    /// <param name="subjectDispenser"></param>
     public void Register(Dispenser subjectDispenser)
     {
       if (!knownDispensers.Contains(subjectDispenser)) {
@@ -106,26 +163,28 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
-    /**
-	   * Load up the right round inspector, activate the appropriate bins and dispensers.
-	   * @TODO when we have event params figured out, use the passed RoundDefinition
-	   * @type {[type]}
-	   */
+    
+    /// <summary>
+    /// Load up the right round inspector, activate the appropriate bins and dispensers.
+    /// @TODO when I have event params figured out, use the passed round definition.
+    /// </summary>
     protected void StartRound()
     {
-      Debug.Log("RM StartRound");
       if (!_GameManager.GameState()) {
         return;
       }
 
       RoundDefinition CurrentRound = _GameManager.CurrentRound;
 
-      SetRoundManager(CurrentRound);
+      SetRoundInspector(CurrentRound);
       SetScoringStrategy(CurrentRound);
       ResetBins(CurrentRound);
       ActivateDispensers(CurrentRound);
     }
 
+    /// <summary>
+    /// End the current round, deactivating bins and dispensers.
+    /// </summary>
     protected void EndRound()
     {
       if (!_GameManager.GameState()) {
@@ -133,10 +192,15 @@ namespace SMG.Santas.RoundFlow
       }
 
       DeactivateBins();
+      DeactivateDispensers();
     }
 
-    // @TODO exception for default round manager not found
-    protected void SetRoundManager(RoundDefinition Round)
+    /// <summary>
+    /// Set the current Round Inspector based on the supplied round definition
+    /// @TODO exception for default round manager not found
+    /// </summary>
+    /// <param name="Round"></param>
+    protected void SetRoundInspector(RoundDefinition Round)
     {
       IRoundInspector TargetInspector = null;
 
@@ -150,6 +214,10 @@ namespace SMG.Santas.RoundFlow
       CurrentRoundInspector.Activate();
     }
 
+    /// <summary>
+    /// Set the current Scoring Strategy based on the supplied round definition 
+    /// </summary>
+    /// <param name="Round"></param>
     protected void SetScoringStrategy(RoundDefinition Round)
     {
       IScoringStrategy TargetStrategy = null;
@@ -164,11 +232,13 @@ namespace SMG.Santas.RoundFlow
       CurrentRoundInspector.Activate();
     }
 
-    /**
-	   * Activate the appropriate dispensers based on round definition.
-	   * @TODO Use the round definition.
-	   * @type {Number}
-	   */
+     
+	 
+    /// <summary>
+    /// Activate the dispensers based on the supplied round definition
+    /// @TODO Err.. use the supplied round definition.
+    /// </summary>
+    /// <param name="Round"></param>
     protected void ActivateDispensers(RoundDefinition Round)
     {
       for (int i = 0; i < knownDispensers.Count; i++) {
@@ -176,11 +246,12 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
-    /**
-	   * Activate the appropriate bins based on the round definition.
-	   * @TODO use the round definition.
-	   * @type {Number}
-	   */
+    /// <summary>
+    /// Activate the appropriate bins based on the round definition
+    /// This will generate a new present list in the bins
+    /// @TODO use the supplied round definition.
+    /// </summary>
+    /// <param name="Round"></param>
     protected void ResetBins(RoundDefinition Round)
     {
       for (int i = 0; i < knownBins.Count; i++) {
@@ -188,6 +259,9 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
+    /// <summary>
+    /// Deactivate all registered bins
+    /// </summary>
     public void DeactivateBins()
     {
       for (int i = 0; i < knownBins.Count; i++) {
@@ -195,6 +269,21 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
+    /// <summary>
+    /// Deactivate all registered dispensers
+    /// </summary>
+    public void DeactivateDispensers()
+    {
+      for (int i = 0; i < knownDispensers.Count; i++) {
+        knownDispensers[i].Deactivate();
+      }
+    }
+
+    /// <summary>
+    /// Score the supplied bin
+    /// @TODO This is a bit funky, come back to it.
+    /// </summary>
+    /// <param name="SubjectBin"></param>
     public void ScoreBin(Collector SubjectBin)
     {
       _EventSource.TriggerEvent(RoundManager.EVENT_SCOREBIN);
@@ -213,7 +302,8 @@ namespace SMG.Santas.RoundFlow
     }
 
     /**
-		 *  All of this is annoying as heck,  Come back to it later with delegates I guess.
+		 * All of this is annoying as heck,  Come back to it later with delegates I guess.
+     * These methods are individual implementations as I was stuck on the event bus with params.
 		 */
 
     public void DispenseBear()
@@ -236,6 +326,12 @@ namespace SMG.Santas.RoundFlow
       GetNextDispenser().DispenseItem(_Settings.HorsePrefab);
     }
 
+
+    /// <summary>
+    /// Find the next dispenser in the list
+    /// @TODO current implementation is a hack to get stuff going.  Do it right!
+    /// </summary>
+    /// <returns></returns>
     public Dispenser GetNextDispenser()
     {
       return knownDispensers[1];

@@ -1,15 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using SMG.Santas.Scoring;
-
 
 namespace SMG.Santas.ObjectScripts
 {
   public class BinScreen : MonoBehaviour
   {
-    TextMesh display;
+    Text display;
 
     public string offText = "Bin Off!";
     public string awayText = "Bin Away!";
@@ -19,7 +19,7 @@ namespace SMG.Santas.ObjectScripts
     // Use this for initialization
     void Start()
     {
-      display = this.gameObject.GetComponent<TextMesh>();
+      display = this.gameObject.GetComponent<Text>();
     }
 
     public void UpdateText(Collector bin)

@@ -10,6 +10,10 @@ using SMG.Santas.GameManagement;
 
 namespace SMG.Santas.ObjectScripts
 {
+  /// <summary>
+  /// This is the MonoBehavior that sends a "Start the game!" signal.
+  /// It should be attached to a lever object of some sort.
+  /// </summary>
   public class StartLever : VRTK_ArtificialRotator
   {
     [SerializeField, Tooltip("How many seconds should the hide animation should last."), Range(0.3f, 3f)]
@@ -29,8 +33,14 @@ namespace SMG.Santas.ObjectScripts
     /// </summary>
     private EventSource _EventSource;
 
-    private Vector3 ContainerScale;
+    /// <summary>
+    /// The size the lever should be when active.
+    /// </summary>
     private Vector3 InitialSize;
+
+    /// <summary>
+    /// The size of the lever at the end of the hide animation
+    /// </summary>
     private Vector3 HiddenSize;
 
     /// <summary>
@@ -58,9 +68,7 @@ namespace SMG.Santas.ObjectScripts
       }
 
       //Set up the scaling info for hiding and showing the lever
-      ContainerScale = parentObj.transform.localScale;
-
-      InitialSize = ContainerScale;
+      InitialSize = parentObj.transform.localScale;
       HiddenSize = InitialSize * hiddenScale;
 
       AllRenderers = parentObj.GetComponentsInChildren<MeshRenderer>();
@@ -73,6 +81,12 @@ namespace SMG.Santas.ObjectScripts
       _EventSource.StartListening(GameManager.EVENT_GAMEEND_AFTER, ShowLever);
     }
 
+
+    /// <summary>
+    /// Callback triggered when the lever hits it's max rotation.
+    /// </summary>
+    /// <param name="Sender"></param>
+    /// <param name="Event"></param>
     protected void LeverPulled(object Sender, ControllableEventArgs Event)
     {
       StartCoroutine(StartHideCoroutine(hideDuration, hideCurve));
@@ -81,6 +95,12 @@ namespace SMG.Santas.ObjectScripts
       _EventSource.TriggerEvent(GameManager.EVENT_GAMESTART);
     }
 
+    /// <summary>
+    /// Animator for the hide lever animation
+    /// </summary>
+    /// <param name="duration"></param>
+    /// <param name="Curve"></param>
+    /// <returns></returns>
     protected IEnumerator StartHideCoroutine(float duration, AnimationCurve Curve)
     {
       float progress = 0f;
@@ -95,30 +115,33 @@ namespace SMG.Santas.ObjectScripts
       HideLever();
     }
 
-    protected void StepScale(float elapsed)
-    {
-      Debug.Log("Stepping scale: " + elapsed);
-    }
-
+    /// <summary>
+    /// This actually hides the lever completely, not just animates the hide
+    /// </summary>
     protected void HideLever()
     {
-      Debug.Log("Hiding Lever");
       SetRenderState(false);
     }
 
+    /// <summary>
+    /// Resets the lever to initial state
+    /// </summary>
     protected void ShowLever()
     {
-      ContainerScale = InitialSize;
+      parentObj.transform.localScale = InitialSize;
       ForceRestingPosition();
 
       // TODO Fire off Particles?
       SetRenderState(true);
     }
 
+    /// <summary>
+    /// Loops through all the mesh renderers on the lever and turns them on/off
+    /// </summary>
+    /// <param name="isActive"></param>
     protected void SetRenderState(bool isActive)
     {
       for (int i = 0; i < AllRenderers.Length; i++) {
-        Debug.Log("Disabling render index: " + i);
         AllRenderers[i].enabled = isActive;
       }
     }
