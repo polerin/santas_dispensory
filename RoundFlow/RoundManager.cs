@@ -8,7 +8,6 @@ using SMG.Santas.Scoring;
 using SMG.Santas.RoundFlow;
 using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
-using SMG.Santas.Events;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -125,7 +124,6 @@ namespace SMG.Santas.RoundFlow
     /// </summary>
     ~RoundManager()
     {
-      Debug.Log("Roundmanager destructor");
       if (_EventSource == null) {
         return;
       }
@@ -304,7 +302,7 @@ namespace SMG.Santas.RoundFlow
     /**
 		 * All of this is annoying as heck,  Come back to it later with delegates I guess.
      * These methods are individual implementations as I was stuck on the event bus with params.
-		 */
+		 */ 
 
     public void DispenseBear()
     {

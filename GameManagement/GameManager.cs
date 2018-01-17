@@ -1,62 +1,74 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 using SMG.Coordination;
-using SMG.Santas.Scoring;
 using SMG.Santas.RoundFlow;
-using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.GameManagement
 {
+  /// <summary>
+  /// Central coordinating object of the game.  Responsible for loading
+  /// game definitions and serves as a facade to the game state object.
+  /// </summary>
   public class GameManager
   {
-    // Issued to start the game.  (not issued by game manager)
+    /// <summary>Issued to start the game.  (not issued by game manager)</summary>
     public const string EVENT_GAMESTART = "game_start";
 
-    // Issued to signal that the game has just started
+    /// <summary>Issued to signal that the game has just started</summary>    
     public const string EVENT_GAMESTART_AFTER = "game_start_after";
 
-    // Issued to signal that the game is ending
+    /// <summary>Issued to signal that the game has just started</summary>
     public const string EVENT_GAMEEND = "game_end";
 
-    //Issued to signal that the game has just ended
+    /// <summary>Issued to signal that the game has just ended</summary>
     public const string EVENT_GAMEEND_AFTER = "game_end_after";
 
-    // Notification that a round is about to start
+    /// <summary>Notification that a round is about to start</summary>
     public const string EVENT_ROUNDSTART = "round_start";
 
-    // Notification that a round is about to end
+    /// <summary>Notification that a round is about to end</summary>
     public const string EVENT_ROUNDEND = "round_end";
 
-    // Notification that an error is about to be added.
+    /// <summary>Notification that an error is about to be added.</summary>
     public const string EVENT_ERRORADDED = "round_error_add";
 
-    // Notification that the player has hit the maximum error count
+    /// <summary>Notification that the player has hit the maximum error count</summary>
     public const string EVENT_MAXERRORS = "round_max_errors";
 
-    // Base Resource path where the game definition JSON files are stored.
+    /// <summary>
+    /// Base Resource path where the game definition JSON files are stored.
+    /// </summary>
     private const string PATH_GAMEDEFINITION = "GameDefinitions/";
 
-    // Default json string returned if a Game Definition can't be loaded.
+    /// <summary>
+    /// Default json string returned if a Game Definition can't be loaded.
+    /// </summary>
     private const string DEFAULT_GAMEDEF = "{}";
 
-    protected ScoreboardDisplay ScoreBoard;
+    /// <summary>
+    /// Injected Event bus
+    /// </summary>
     protected EventSource _EventSource;
 
+    /// <summary>
+    /// The game state object.  Created on game definition load
+    /// </summary>
     public Game CurrentGame { get; protected set; }
 
+    /// <summary>
+    /// Round definition accessor.  Demeter facade.
+    /// </summary>
     public RoundDefinition CurrentRound {
       get { return CurrentGame.CurrentRound; }
       protected set { }
     }
 
 
-    /**
-		 * Constructor
-		 */
+    /// <summary>
+    /// Constructor injection, starts listening to game and round lifecycle events
+    /// </summary>
+    /// <param name="EventSource"></param>
     public GameManager(EventSource EventSource)
     {
       InitMonitors();
@@ -70,12 +82,27 @@ namespace SMG.Santas.GameManagement
 
     }
 
+    /// <summary>
+    /// Destructor, clean up our listening.
+    /// </summary>
     ~GameManager()
     {
-      // _EventSource.StopListening(GameManager.EVENT_GAMESTART, m_GameStartAction);
+      if (_EventSource == null) {
+        return;
+      }
+
+      _EventSource.StopListening(GameManager.EVENT_GAMESTART, StartGame);
+      _EventSource.StopListening(GameManager.EVENT_MAXERRORS, EndGame);
+      _EventSource.StopListening(AbstractRoundInspector.EVENT_CONDITION_SUCCESS, EndRound);
+      _EventSource.StopListening(AbstractRoundInspector.EVENT_CONDITION_FAILURE, EndGame);
     }
 
 
+    /// <summary>
+    /// Check the games state to see if the game is active
+    /// @TODO This is pretty crappily named.  Should rename it IsGameOn()
+    /// </summary>
+    /// <returns></returns>
     public bool GameState()
     {
       if (CurrentGame == null) {
@@ -85,6 +112,9 @@ namespace SMG.Santas.GameManagement
       return CurrentGame.gameOn;
     }
 
+    /// <summary>
+    /// Add an error to the current game.  If Max errors have been reached send the event.
+    /// </summary>
     public void AddError()
     {
       // @TODO figure out how to send back a cancel.  Exception?
@@ -97,13 +127,14 @@ namespace SMG.Santas.GameManagement
       }
     }
 
-    /* Game Lifecycle event management */
-
+    /// <summary>
+    /// Load a game definition and start the game
+    /// @TODO provide a way to load different defintions
+    /// </summary>
     protected void StartGame()
     {
-      Debug.Log("GM Startgame");
       if (GameState()) {
-        Debug.Log("Attempting to start an already started game");
+        Debug.LogWarning("Attempting to start an already started game");
         return;
       }
 
@@ -115,10 +146,13 @@ namespace SMG.Santas.GameManagement
       StartRound();
     }
 
+    /// <summary>
+    /// End the currently active game and trigger a scene reset
+    /// </summary>
     protected void EndGame()
     {
       if (!GameState()) {
-        Debug.Log("Attempting to End an inactive game");
+        Debug.LogWarning("Attempting to End an inactive game");
         return;
       }
 
@@ -128,9 +162,14 @@ namespace SMG.Santas.GameManagement
       _EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
     }
 
+    /// <summary>
+    /// Start a round
+    /// @TODO put in some checks to make sure we are not re-starting a round?
+    /// </summary>
     protected void StartRound()
     {
       if (!GameState()) {
+        Debug.LogWarning("Attempting to Start a round on an inactive game");
         return;
       }
       CurrentGame.AdvanceRound();
@@ -138,14 +177,18 @@ namespace SMG.Santas.GameManagement
       _EventSource.TriggerEvent(GameManager.EVENT_ROUNDSTART);
     }
 
+    /// <summary>
+    /// End the currently active round
+    /// </summary>
     protected void EndRound()
     {
       _EventSource.TriggerEvent(GameManager.EVENT_ROUNDEND);
     }
 
-
-    /* Mechanics and loading methods. */
-
+    /// <summary>
+    /// Activate a display on the "normal" monitor for the seated players
+    /// @TODO this currently doesn't work.  What am I doing wrong?
+    /// </summary>
     protected void InitMonitors()
     {
       if (Display.displays.Length <= 1) {
@@ -156,11 +199,23 @@ namespace SMG.Santas.GameManagement
       Display.displays[1].Activate();
     }
 
+    /// <summary>
+    /// Load a game definition from a resources json file
+    /// @TODO this is not currently loading rounds correctly.
+    /// @TODO it really seems silly to have this as a one liner. Combine with LoadJson()?
+    /// </summary>
+    /// <param name="Type"></param>
+    /// <returns></returns>
     protected Game LoadGameDefinition(GameTypes Type)
     {
       return JsonUtility.FromJson<Game>(LoadJson(Type));
     }
 
+    /// <summary>
+    /// Load a jason file from resources
+    /// </summary>
+    /// <param name="Type"></param>
+    /// <returns></returns>
     protected string LoadJson(GameTypes Type)
     {
       string ResourcePath = GameManager.PATH_GAMEDEFINITION + Enum.GetName(typeof(GameTypes), Type);
