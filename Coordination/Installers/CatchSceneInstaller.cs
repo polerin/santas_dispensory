@@ -6,10 +6,8 @@ using SMG.Coordination.Pools;
 using SMG.Santas.Scoring;
 using SMG.Santas.GameManagement;
 using SMG.Santas.RoundFlow;
-using SMG.Santas.Events;
 using SMG.Santas.ObjectScripts;
 
-using UnityEngine.Events;
 
 namespace SMG.Santas.Coordination
 {

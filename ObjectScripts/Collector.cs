@@ -1,17 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using VRTK.Controllables;
 using VRTK.Controllables.ArtificialBased;
 
-
 using SMG.Santas.Scoring;
 using SMG.Santas.RoundFlow;
-using System;
 
 namespace SMG.Santas.ObjectScripts
 {
+  /// <summary>
+  /// This is the main bin script.  It is responsible
+  /// for mainting bin state, including CatchMe objects
+  /// and Present list.
+  /// </summary>
   public class Collector : MonoBehaviour
   {
     [SerializeField, Tooltip("When it hits MaxRotation, this rotator signals that the bin should be scored.")]
@@ -21,14 +23,9 @@ namespace SMG.Santas.ObjectScripts
     private BinScreen Screen;
     
     /// <summary>
-    /// initial state is "off" (StateOff)
-    /// @TODO this is bad and should be an ENUM if anything
+    /// initial state is "off"
     /// </summary>
-    private int binState = 0;
-
-    public readonly int StateReady = 1;
-    public readonly int StateAway = 2;
-    public readonly int StateWaiting = 4;
+    public bool isActive { get; protected set; } = false;
 
     /// <summary>
     /// The Roundmanager is responsible for controlling all of the prefabs in the scene
@@ -48,61 +45,86 @@ namespace SMG.Santas.ObjectScripts
     [Inject]
     void Init(RoundManager Manager, PresentList List)
     {
-      SendIndicator.MaxLimitReached += LidClosed;
       this._RoundManager = Manager;
       this._RoundManager.Register(this);
 
-      this.AddPresentList(List);
+      this.AddPresentList(List); //realstically this probably should not be injected.
+
+      SendIndicator.MaxLimitReached += LidClosed;
     }
 
+    /// <summary>
+    /// VRTK event handler, Fired when lid reaches max limit
+    /// </summary>
+    /// <param name="Sender"></param>
+    /// <param name="Event"></param>
     private void LidClosed(object Sender, ControllableEventArgs Event)
     {
-      Debug.Log("Lid closed!");
+      if (!isActive) {
+        return;
+      }
+
       RedeemList();
-      // Play Score particle
+      PlayScoreSound();
+      // @TODO Play Score particle
+      // @TODO Lock Lid for scoring down time?
     }
 
+    /// <summary>
+    /// Add a present list to the bin.
+    /// By default, this will make the list the Current List
+    /// </summary>
+    /// <param name="newList"></param>
     public void AddPresentList(PresentList newList)
     {
       currentList = newList;
 
-      if (!this.State(StateReady)) {
-        this.FlipState(StateReady);
-      }
+      if (!isActive) {
+        this.Activate();
+      } 
     }
 
+    /// <summary>
+    /// @TODO Switch to getter
+    /// </summary>
+    /// <returns></returns>
     public PresentList GetPresentList()
     {
       return currentList;
     }
 
-    public bool Wait()
-    {
-      return this.Wait(true);
-    }
-
-    public bool Wait(bool desiredState)
-    {
-      if (this.State(this.StateWaiting) != desiredState) {
-        this.FlipState(this.StateWaiting);
-      }
-
-      return true;
-    }
-
+    /// <summary>
+    /// @TODO this needs a rename. Look in RoundManager.
+    /// </summary>
     public void Reset()
     {
-      this.Wait(false);
+      this.Activate();
       this.GetPresentList().GenerateRandomCounts();
       this.EmptyCollector();
     }
+    
+    /// <summary>
+    /// Mark the bin as ready to be used, open the lid
+    /// </summary>
+    public void Activate()
+    {
+      //OpenLid();
+      isActive = true;
+    }
 
+    /// <summary>
+    /// Mark the bin as not ready to be used and close the lid
+    /// </summary>
     public void Deactivate()
     {
-      this.Wait(true);
+      //CloseLid();
+      isActive = false;
       this.EmptyCollector();
     }
 
+    /// <summary>
+    /// Remove all catchme scripts from the collector.
+    /// </summary>
     public void EmptyCollector()
     {
       foreach (CatchMeScript subject in contents) {
@@ -112,14 +134,14 @@ namespace SMG.Santas.ObjectScripts
       Screen.UpdateText(this);
     }
 
-    public bool State(int stateValue)
-    {
-      return (binState & stateValue) == stateValue;
-    }
-
+    /// <summary>
+    /// Trigger enter, only used if bin is active.
+    /// Marks catch objects as collected.
+    /// </summary>
+    /// <param name="otherCollider"></param>
     void OnTriggerEnter(Collider otherCollider)
     {
-      if (!this.CanAccept()) {
+      if (!this.isActive) {
         return;
       }
 
@@ -128,6 +150,10 @@ namespace SMG.Santas.ObjectScripts
       }
     }
 
+    /// <summary>
+    /// Trigger exit, Marks catch objects as no longer collected.
+    /// </summary>
+    /// <param name="otherCollider"></param>
     void OnTriggerExit(Collider otherCollider)
     {
       if (otherCollider.CompareTag("CatchObject")) {
@@ -135,6 +161,10 @@ namespace SMG.Santas.ObjectScripts
       }
     }
 
+    /// <summary>
+    /// Mark CatchmeScript objects as collected
+    /// </summary>
+    /// <param name="present"></param>
     void MarkAdded(GameObject present)
     {
       CatchMeScript otherScript = present.GetComponent<CatchMeScript>();
@@ -146,6 +176,10 @@ namespace SMG.Santas.ObjectScripts
       otherScript.MarkCollectedBy(this);
     }
 
+    /// <summary>
+    /// Mark CatchmeScript object as no longer collected
+    /// </summary>
+    /// <param name="present"></param>
     void MarkRemoved(GameObject present)
     {
       CatchMeScript otherScript = present.GetComponent<CatchMeScript>();
@@ -160,18 +194,22 @@ namespace SMG.Santas.ObjectScripts
 
     /// <summary>
     /// Send the bin to the RoundManager to be scored
-    /// @TODO make this return a bool for partical usage?
+    /// @TODO make this return a bool for particle usage?
     /// </summary>
     void RedeemList()
     {
-      if (!this.CanAccept()) {
+      if (!isActive) {
         return;
       }
 
-      this._RoundManager.ScoreBin(this);
+      _RoundManager.ScoreBin(this);
     }
 
-    void PlaySuccessSound()
+    /// <summary>
+    /// Play a success sound
+    /// @TODO stop using GetComponent here
+    /// </summary>
+    void PlayScoreSound()
     {
       AudioSource success = this.GetComponent<AudioSource>();
       if (success != null) {
@@ -179,19 +217,11 @@ namespace SMG.Santas.ObjectScripts
       }
     }
 
-    bool FlipState(int stateValue)
-    {
-      binState ^= stateValue;
-
-      return (binState & stateValue) == stateValue;
-    }
-
-    bool CanAccept()
-    {
-      return (this.State(StateReady) && !this.State(StateAway) && !this.State(StateWaiting));
-    }
-
-
+    /// <summary>
+    /// Get the per-type count of CatchMeScript objects.
+    /// @TODO This needs to be reworked for the CatchTypes Enum.
+    /// </summary>
+    /// <returns></returns>
     public Dictionary<string, int> GetContentCount()
     {
       Dictionary<string, int> counts = new Dictionary<string, int>();

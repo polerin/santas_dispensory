@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,17 +24,11 @@ namespace SMG.Santas.ObjectScripts
     public void UpdateText(Collector bin)
     {
 
-      if (!bin.State(bin.StateReady)) {
-        display.text = offText;
-
-      } else if (bin.State(bin.StateAway)) {
-        display.text = awayText;
-
-      } else if (bin.State(bin.StateWaiting)) {
-        display.text = waitingText;
-
-      } else {
+      if (bin.isActive) {
         display.text = this.FormatList(bin.GetPresentList());
+
+      } else { 
+        display.text = offText;
       }
     }
 

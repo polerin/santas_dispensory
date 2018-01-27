@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 
 namespace SMG.Santas.ObjectScripts
@@ -9,12 +8,12 @@ namespace SMG.Santas.ObjectScripts
   public class ScoreboardDisplay : MonoBehaviour
   {
     [SerializeField] GameObject ScoreTextObject;
-    TextMesh ScoreText;
+    Text ScoreText;
 
     // Use this for initialization
     void Start()
     {
-      this.ScoreText = ScoreTextObject.GetComponent<TextMesh>();
+      this.ScoreText = ScoreTextObject.GetComponent<Text>();
     }
 
     public void UpdateText(int bins, int errors, int score, int round, bool gameOn)

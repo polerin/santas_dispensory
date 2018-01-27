@@ -1,30 +1,24 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Events;
-
-using SMG.Santas.Events;
 
 namespace SMG.Coordination
 {
-  /**
-   * Central Point for messaging.
-   * @type {Dictionary}
-   */
+  /// <summary>
+  /// Basic implementation of an Event bus.  This is based on the unity tutorials
+  /// and could probably be greatly improved.  It definitely needs to support event
+  /// details, but I had been stuck on it for far too long.
+  /// </summary>
   public class EventSource
   {
-
+    /// <summary>
+    /// This is the dictionary of known events.  If a listen call is 
+    /// supplied for an unknown event, an event will be created and added
+    /// </summary>
     private Dictionary<string, object> eventDictionary;
 
     public EventSource()
     {
       eventDictionary = new Dictionary<string, object>();
-    }
-
-    public void AddEvent<EventClass>(EventClass NewEvent) where EventClass : ISluggableEvent
-    {
-      eventDictionary.Add(NewEvent.Slug(), NewEvent);
     }
 
     public void StartListening(string eventName, UnityAction listener)
