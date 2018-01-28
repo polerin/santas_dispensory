@@ -34,10 +34,10 @@ namespace SMG.Santas.ObjectScripts
 
     string FormatList(PresentList binList)
     {
-      Dictionary<string, int> counts = binList.Counts();
+      Dictionary<CatchTypes, int> counts = binList.Counts();
       string result = "";
 
-      foreach (KeyValuePair<string, int> requirement in counts) {
+      foreach (KeyValuePair<CatchTypes, int> requirement in counts) {
         result += requirement.Key + "\t" + requirement.Value + "\n";
       }
 

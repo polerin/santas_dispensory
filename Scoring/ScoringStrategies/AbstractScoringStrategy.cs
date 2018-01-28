@@ -1,8 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-using SMG.Santas.Scoring;
 using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.Scoring
@@ -20,6 +16,6 @@ namespace SMG.Santas.Scoring
       return ScoreList(SubjectBin.GetPresentList(), SubjectBin.GetContentCount());
     }
 
-    public abstract PresentList ScoreList(PresentList binList, Dictionary<string, int> binContents);
+    public abstract PresentList ScoreList(PresentList binList, Dictionary<CatchTypes, int> binContents);
   }
 }

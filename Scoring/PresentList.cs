@@ -1,12 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.Scoring
 {
   public class PresentList
   {
-    Dictionary<string, int> presentCounts = new Dictionary<string, int>();
+    Dictionary<CatchTypes, int> presentCounts = new Dictionary<CatchTypes, int>();
 
     private int maxCount = 3;
     private int minCount = 1;
@@ -17,10 +18,10 @@ namespace SMG.Santas.Scoring
     public PresentList()
     {
       // init our counts
-      this.presentCounts.Add("horse", 0);
-      this.presentCounts.Add("bear", 0);
-      this.presentCounts.Add("present", 0);
-      this.presentCounts.Add("ornament", 0);
+      this.presentCounts.Add(CatchTypes.Bear, 0);
+      this.presentCounts.Add(CatchTypes.Ball, 0);
+      this.presentCounts.Add(CatchTypes.Present, 0);
+      this.presentCounts.Add(CatchTypes.Horse, 0);
 
       // mark when the list was created
       this.MarkStart();
@@ -28,18 +29,18 @@ namespace SMG.Santas.Scoring
 
     public void GenerateRandomCounts()
     {
-      Dictionary<string, int> temp = new Dictionary<string, int>();
+      Dictionary<CatchTypes, int> temp = new Dictionary<CatchTypes, int>();
 
-      foreach (string key in presentCounts.Keys) {
+      foreach (CatchTypes key in presentCounts.Keys) {
         temp[key] = Random.Range(this.minCount, this.maxCount);
       }
 
-      foreach (KeyValuePair<string, int> newVals in temp) {
+      foreach (KeyValuePair<CatchTypes, int> newVals in temp) {
         this.SetTypeCount(newVals.Key, newVals.Value);
       }
     }
 
-    public void SetTypeCount(string type, int count)
+    public void SetTypeCount(CatchTypes type, int count)
     {
       if (!this.presentCounts.ContainsKey(type)) {
         return;
@@ -54,9 +55,9 @@ namespace SMG.Santas.Scoring
       this.presentCounts[type] = count;
     }
 
-    public Dictionary<string, int> Counts()
+    public Dictionary<CatchTypes, int> Counts()
     {
-      return new Dictionary<string, int>(presentCounts);
+      return new Dictionary<CatchTypes, int>(presentCounts);
     }
 
     public void Duration()

@@ -78,8 +78,6 @@ namespace SMG.Santas.GameManagement
       _EventSource.StartListening(GameManager.EVENT_MAXERRORS, EndGame);
       _EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_SUCCESS, EndRound);
       _EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_FAILURE, EndGame);
-
-
     }
 
     /// <summary>

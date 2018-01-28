@@ -222,15 +222,17 @@ namespace SMG.Santas.ObjectScripts
     /// @TODO This needs to be reworked for the CatchTypes Enum.
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string, int> GetContentCount()
+    public Dictionary<CatchTypes, int> GetContentCount()
     {
-      Dictionary<string, int> counts = new Dictionary<string, int>();
+      Dictionary<CatchTypes, int> counts = new Dictionary<CatchTypes, int>();
+      CatchTypes CurrentType;
 
       foreach (CatchMeScript subject in this.contents) {
-        if (!counts.ContainsKey(subject.catchType)) {
-          counts[subject.catchType] = 1;
+        CurrentType = subject.CatchType(); 
+        if (!counts.ContainsKey(CurrentType)) {
+          counts[CurrentType] = 1;
         } else {
-          counts[subject.catchType] = (int)counts[subject.catchType] + 1;
+          counts[CurrentType] = (int)counts[CurrentType] + 1;
         }
       }
 

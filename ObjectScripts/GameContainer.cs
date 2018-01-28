@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 using SMG.Coordination;
 using SMG.Santas.GameManagement;
-using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.ObjectScripts
 {
