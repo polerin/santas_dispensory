@@ -16,29 +16,71 @@ namespace SMG.Santas.Coordination
    */
   public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller>
   {
-    [SerializeField]
+    [SerializeField, Tooltip("Settings passed to the CatchMeScript memory pools.")]
     private MemoryPoolSettings CatchMePoolSettings;
-    [SerializeField]
+    [SerializeField, Tooltip("Settings passed to the Round Manager.")]
     private RoundManager.Settings RoundManagerSettings;
+    [SerializeField, Tooltip("Control settings for the 2 player partner game type.")]
+    private PartnerControlSet.Settings PartnerControlSetSettings;
+    [SerializeField, Tooltip("Control settings for the solo play game type.")]
+    private SoloControlSet.Settings SoloControlSetSettings;
+
 
     public override void InstallBindings()
     {
-      Container.Bind<IScoringStrategy>().To<StandardScoring>().AsCached();
 
+      // PresentLists are required for each active Collector, and should not be
+      // shared across the collectors
       Container.Bind<PresentList>().AsTransient();
 
+      // This is the main event bus.  It is required by all managers, and many
+      // control oriented GameObjects.
+      Container.Bind<EventSource>().AsSingle();
+
+      // These are overall game state managers.  They generally defer thier
+      // implementation to event listeners or supplied strategies.
       Container.Bind<GameManager>().AsSingle();
       Container.Bind<RoundManager>().AsSingle().WithArguments(RoundManagerSettings);
       Container.Bind<ScoreKeeper>().AsSingle();
-      Container.Bind<EventSource>().AsSingle();
 
-      Container.Bind<IRoundInspector>().To<BinCountInspector>().AsSingle();
-      // Container.Bind<IRoundInspector>().To<TimeLimitInspector>().AsSingle();
-
+      // Both the CatchMeFactory and the MemoryPoolGroup are required for the
+      // spawning and management of catchable objects.
       Container.BindInterfacesAndSelfTo<CatchMeFactory>().AsTransient();
       Container.BindInterfacesAndSelfTo<MemoryPoolGroup<GameObject, CatchMeScript, CatchMeFactory, CatchMeScript.Pool>>()
         .AsSingle()
         .WithArguments(CatchMePoolSettings);
+
+      BindStrategyLists();
+      BindSceneObjects();
+    }
+
+    protected void BindStrategyLists()
+    {
+      // Round Inspectors keep watch on the current round state and control the
+      // signalling for end of round.  They are provided to the RoundManager.
+      Container.Bind<IRoundInspector>().To<BinCountInspector>().AsSingle();
+      // Container.Bind<IRoundInspector>().To<TimeLimitInspector>().AsSingle();
+      // Container.Bind<IRoundInspector>().To<TimeCrushInspector>().AsSingle();
+
+      // Scoring Strategies are responsible for checking the correctness of
+      // a supplied Collector, then generating a score from that based on the
+      // Collector's PresentList and current contents.  They are supplied to
+      // the Round Manager.
+      Container.Bind<IScoringStrategy>().To<StandardScoring>().AsSingle();
+      // Container.Bind<IScoringStrategy>().To<TimeCrushScoring>().AsSingle();
+
+      // ControlSets are resonsible for triggering the spawning of Catchable
+      // objects.  They are provided to the Round Manager.
+      Container.Bind<IControlSet>().To<PartnerControlSet>().AsSingle().WithArguments(PartnerControlSetSettings);
+      Container.Bind<IControlSet>().To<SoloControlSet>().AsSingle().WithArguments(SoloControlSetSettings);
+
+    }
+
+    protected void BindSceneObjects()
+    {
+      // The Scoreboard Display is needed by some Round Inspectors, and is
+      // used to update the DetailText and DetailValue fields.
+      Container.Bind<ScoreboardDisplay>().FromComponentInHierarchy();
     }
   }
 }
