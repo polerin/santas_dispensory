@@ -78,10 +78,6 @@ namespace SMG.Santas.ObjectScripts
     public void AddPresentList(PresentList newList)
     {
       currentList = newList;
-
-      if (!isActive) {
-        this.Activate();
-      } 
     }
 
     /// <summary>

@@ -1,7 +1,4 @@
-using UnityEngine.Events;
-
 using SMG.Coordination;
-using SMG.Santas.Scoring;
 using SMG.Santas.GameManagement;
 
 namespace SMG.Santas.RoundFlow
@@ -11,8 +8,14 @@ namespace SMG.Santas.RoundFlow
 
     int maxBins;
 
-    public BinCountInspector(EventSource Source, GameManager GameManager)
-      : base(Source, GameManager) { }
+    public BinCountInspector(EventSource Source, GameManager GameManager) : base(Source, GameManager)
+    {
+    }
+
+    ~BinCountInspector()
+    {
+      Deactivate();
+    }
 
     public override string Slug()
     {

@@ -26,22 +26,6 @@ namespace SMG.Santas.ObjectScripts
         this._EventSource.TriggerEvent(GameManager.EVENT_GAMESTART);
       }
 
-      if (Input.GetKeyDown(KeyCode.Keypad1)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_BEAR);
-      }
-
-
-      if (Input.GetKeyDown(KeyCode.Keypad2)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_BALL);
-      }
-
-      if (Input.GetKeyDown(KeyCode.Keypad3)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_PRESENT);
-      }
-
-      if (Input.GetKeyDown(KeyCode.Keypad4)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_HORSE);
-      }
     }
   }
 }

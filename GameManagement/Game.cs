@@ -6,8 +6,10 @@ namespace SMG.Santas.GameManagement
   //@TODO Serializable
   public class Game
   {
+    public const string GAMESTYLE_PARTNER = "partner";
+    public const string GAMESTYLE_SOLO = "solo";
     // Solo or co-op (for now?)
-    public string GameStyle = "co-op";
+    public string GameStyle = "partner";
 
     // Easy, Normal, Hard
     public string Difficulty = "normal";

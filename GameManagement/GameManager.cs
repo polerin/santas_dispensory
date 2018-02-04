@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 using SMG.Coordination;
@@ -52,6 +53,16 @@ namespace SMG.Santas.GameManagement
     protected EventSource _EventSource;
 
     /// <summary>
+    /// Injected list of control sets
+    /// </summary>
+    protected Dictionary<string, IControlSet> _ControlSets = new Dictionary<string, IControlSet>();
+
+    /// <summary>
+    /// The control set currently active
+    /// </summary>
+    protected IControlSet CurrentControlSet;
+
+    /// <summary>
     /// The game state object.  Created on game definition load
     /// </summary>
     public Game CurrentGame { get; protected set; }
@@ -69,15 +80,18 @@ namespace SMG.Santas.GameManagement
     /// Constructor injection, starts listening to game and round lifecycle events
     /// </summary>
     /// <param name="EventSource"></param>
-    public GameManager(EventSource EventSource)
+    public GameManager(EventSource EventSource, List<IControlSet> ControlSets)
     {
-      InitMonitors();
       _EventSource = EventSource;
 
       _EventSource.StartListening(GameManager.EVENT_GAMESTART, StartGame);
       _EventSource.StartListening(GameManager.EVENT_MAXERRORS, EndGame);
       _EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_SUCCESS, EndRound);
       _EventSource.StartListening(AbstractRoundInspector.EVENT_CONDITION_FAILURE, EndGame);
+
+      for (int i = 0; i < ControlSets.Count; i++) {
+        _ControlSets.Add(ControlSets[i].Slug(), ControlSets[i]);
+      }
     }
 
     /// <summary>
@@ -136,7 +150,9 @@ namespace SMG.Santas.GameManagement
         return;
       }
 
-      CurrentGame = LoadGameDefinition(GameTypes.StandardNormal);
+      CurrentGame = LoadGameDefinition(GameTypes.PartnerNormal);
+      ActivateControlSetForGame(CurrentGame);
+
       CurrentGame.gameOn = true;
 
       _EventSource.TriggerEvent(GameManager.EVENT_GAMESTART_AFTER);
@@ -156,8 +172,34 @@ namespace SMG.Santas.GameManagement
 
       _EventSource.TriggerEvent(GameManager.EVENT_GAMEEND);
       CurrentGame.gameOn = false;
+      DeactivateCurrentControlSet();
 
       _EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
+    }
+
+    protected void ActivateControlSetForGame(Game TargetGame)
+    {
+      if (CurrentControlSet != null) {
+        Debug.LogWarning("Activating new control set without deactivating previous: " + CurrentControlSet.Slug());
+        DeactivateCurrentControlSet();
+      }
+
+      string controlSetSlug = TargetGame.GameStyle + "ControlSet";
+
+      if (!_ControlSets.TryGetValue(controlSetSlug, out CurrentControlSet)) {
+        Debug.LogError("Unable to locate requested control set: " + controlSetSlug);
+        return;
+      }
+
+      CurrentControlSet.Activate();
+    }
+
+    protected void DeactivateCurrentControlSet()
+    {
+      if (CurrentControlSet != null) {
+        CurrentControlSet.Deactivate();
+        CurrentControlSet = null;
+      }
     }
 
     /// <summary>
@@ -181,20 +223,6 @@ namespace SMG.Santas.GameManagement
     protected void EndRound()
     {
       _EventSource.TriggerEvent(GameManager.EVENT_ROUNDEND);
-    }
-
-    /// <summary>
-    /// Activate a display on the "normal" monitor for the seated players
-    /// @TODO this currently doesn't work.  What am I doing wrong?
-    /// </summary>
-    protected void InitMonitors()
-    {
-      if (Display.displays.Length <= 1) {
-        Debug.Log("Well that's odd, no real monitor");
-        return;
-      }
-
-      Display.displays[1].Activate();
     }
 
     /// <summary>

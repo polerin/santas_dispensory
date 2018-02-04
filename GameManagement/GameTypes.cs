@@ -1,8 +1,8 @@
 public enum GameTypes
 {
-  StandardEasy,
-  StandardNormal,
-  StandardHard,
+  PartnerEasy,
+  PartnerNormal,
+  PartnerHard,
   SoloEasy,
   SoloNormal,
   SoloHard
