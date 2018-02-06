@@ -177,6 +177,10 @@ namespace SMG.Santas.GameManagement
       _EventSource.TriggerEvent(GameManager.EVENT_GAMEEND_AFTER);
     }
 
+    /// <summary>
+    /// Safely activate a known ControlSet
+    /// </summary>
+    /// <param name="TargetGame"></param>
     protected void ActivateControlSetForGame(Game TargetGame)
     {
       if (CurrentControlSet != null) {
@@ -194,6 +198,10 @@ namespace SMG.Santas.GameManagement
       CurrentControlSet.Activate();
     }
 
+
+    /// <summary>
+    /// If a ControlSet has been activated, deactivate it safely
+    /// </summary>
     protected void DeactivateCurrentControlSet()
     {
       if (CurrentControlSet != null) {

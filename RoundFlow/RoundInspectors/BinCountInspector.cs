@@ -1,5 +1,6 @@
 using SMG.Coordination;
 using SMG.Santas.GameManagement;
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -8,7 +9,7 @@ namespace SMG.Santas.RoundFlow
 
     int maxBins;
 
-    public BinCountInspector(EventSource Source, GameManager GameManager) : base(Source, GameManager)
+    public BinCountInspector(EventSource Source, GameManager GameManager, ScoreboardDisplay Scoreboard) : base(Source, GameManager, Scoreboard)
     {
     }
 

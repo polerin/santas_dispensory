@@ -3,7 +3,13 @@ using SMG.Santas.Scoring;
 
 namespace SMG.Santas.GameManagement
 {
-  //@TODO Serializable
+  // @TODO Serializable
+  // @TODO WHY IS EVERYTHING PUBLIC OH MY GOD
+  /// <summary>
+  /// This is the main model for game data.  It contains score,
+  /// errors, the round list, and any other information needed
+  /// to represent the progress of the player(s) in the game.
+  /// </summary>
   public class Game
   {
     public const string GAMESTYLE_PARTNER = "partner";
@@ -30,6 +36,13 @@ namespace SMG.Santas.GameManagement
     public int currentScore = 0;
 
     public bool gameOn = false;
+
+    protected GameDescriptor Description;
+
+    public Game()
+    {
+      Description = new GameDescriptor();
+    }
 
     public int AddError()
     {
@@ -69,6 +82,15 @@ namespace SMG.Santas.GameManagement
     {
       CurrentRound = GenerateStubRoundDefinition();
       return this;
+    }
+
+    public GameDescriptor GetDescription()
+    {
+      Description.round = currentRoundIndex + 1;
+      Description.score = currentScore;
+      Description.errors = currentErrors;
+
+      return Description;
     }
 
     protected RoundDefinition GenerateStubRoundDefinition()
