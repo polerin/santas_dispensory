@@ -1,3 +1,4 @@
+using System;
 using SMG.Coordination;
 using SMG.Santas.ObjectScripts;
 
@@ -13,6 +14,12 @@ namespace SMG.Santas.RoundFlow
     public AbstractControlSet(EventSource EventSource)
     {
         _EventSource = EventSource;
+    }
+
+    protected void DispenseRandom()
+    {
+      // @TODO: Implement me.  No, really.  Needed for SoloControlSet
+      throw new NotImplementedException();
     }
 
     protected void DispenseBear()

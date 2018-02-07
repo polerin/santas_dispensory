@@ -2,7 +2,6 @@ using UnityEngine;
 using Zenject;
 
 using SMG.Coordination;
-using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -32,22 +31,20 @@ namespace SMG.Santas.RoundFlow
     public void Tick()
     {
       // @TODO make this not crap
-      Debug.Log("TICK TICK TICK");
       if (Input.GetKeyDown(KeyCode.Keypad1)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_BEAR);
+        DispenseBear();
       }
 
-
       if (Input.GetKeyDown(KeyCode.Keypad2)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_BALL);
+        DispenseBall();
       }
 
       if (Input.GetKeyDown(KeyCode.Keypad3)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_PRESENT);
+        DispensePresent();
       }
 
       if (Input.GetKeyDown(KeyCode.Keypad4)) {
-        this._EventSource.TriggerEvent(Dispenser.DISPENSE_HORSE);
+        DispenseHorse();
       }
     }
     public override string Slug()

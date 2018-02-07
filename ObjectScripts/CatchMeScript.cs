@@ -70,7 +70,7 @@ namespace SMG.Santas.ObjectScripts
       transform.position = position;
       projectile.velocity = velocity;
     }
-    
+
     /// <summary>
     /// Called when a VRTK controller grabs the object.
     /// This stops the destruction coroutine.  No manual grabbed mark needed,
@@ -134,7 +134,7 @@ namespace SMG.Santas.ObjectScripts
       destruction = DestructionCheck();
       StartCoroutine(destruction);
     }
-    
+
     /// <summary>
     /// Despawn this object or return it to the pool
     /// </summary>
@@ -159,6 +159,7 @@ namespace SMG.Santas.ObjectScripts
 
     /// <summary>
     /// Coroutine that attempts to despawn the object when time expires
+    /// @TODO Switch this to an await?
     /// </summary>
     /// <returns></returns>
     IEnumerator DestructionCheck()
