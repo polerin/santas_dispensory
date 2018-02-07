@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
+using SMG.Coordination;
 using SMG.Santas.GameManagement;
 
 namespace SMG.Santas.ObjectScripts
@@ -23,36 +25,50 @@ namespace SMG.Santas.ObjectScripts
     [SerializeField]
     Text FullText;
 
-    [SerializeField, Tooltip("The Canvas displayed while the game is active")]
+    [SerializeField, Tooltip("The Canvas displayed while the game is active.")]
     Canvas DetailCanvas;
 
-    [SerializeField, Tooltip("The Score label text object, which should have an Text child object to use as it's value display.")]
-    Text ScoreText;
-    [SerializeField]
+    [SerializeField, Tooltip("The Score value text object.")]
     Text ScoreValue;
 
-    [SerializeField, Tooltip("The Round label text object, which should have an Text child object to use as it's value display.")]
-    Text RoundText;
-    [SerializeField]
+    [SerializeField, Tooltip("The Round value display.")]
     Text RoundValue;
 
-    [SerializeField, Tooltip("The Errors label text object, which should have an Text child object to use as it's value display.")]
-    Text ErrorsText;
-    [SerializeField]
+    [SerializeField, Tooltip("The Errors value text object.")]
     Text ErrorsValue;
 
-    [SerializeField, Tooltip("The per-inspector criteria label, which should have an Text child object to use as it's value display.")]
+    [SerializeField, Tooltip("The per-RoundInspector criteria label.")]
     Text DetailText;
-    [SerializeField]
+    [SerializeField, Tooltip("The per-RoundInspector value display.")]
     Text DetailValue;
 
+    /// <summary>
+    /// Injected Event bus
+    /// </summary>
+    EventSource _EventSource;
 
-    // Use this for initialization
     void Start()
     {
       DisplayFullText(defaultFullText);
-      DetailCanvas.enabled = false;
     }
+
+    [Inject]
+    private void Init(EventSource EventSource)
+    {
+      _EventSource = EventSource;
+
+      _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);
+    }
+
+    private void OnDestroy()
+    {
+      if (_EventSource == null) {
+        return;
+      }
+
+      _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);  
+    }
+
 
     protected void DisplayFullText()
     {
@@ -82,18 +98,6 @@ namespace SMG.Santas.ObjectScripts
       ScoreValue.text = Game.score.ToString();
       DetailText.text = Game.detailLabel;
       DetailValue.text = Game.detailValue;
- 
-    }
-
-
-    public void UpdateFullText(int bins, int errors, int score, int round, bool gameOn)
-    {
-      this.ScoreText.text = "Bins Left:\t" + bins + "\n"
-        + "Errors:\t" + errors + "\n"
-        + "Score:\t" + score + "\n"
-        + "Round:\t" + (round + 1) + "\n"
-        + "\nGame:\t";
-      this.ScoreText.text += (gameOn) ? "On" : "Off";
     }
   }
 }

@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.Events;
 
 using SMG.Coordination;
@@ -75,8 +76,8 @@ namespace SMG.Santas.RoundFlow
         Game = new GameDescriptor();
       }
 
-      Game.detailLabel = GetDetailLabel();
-      Game.detailValue = GetDetailValue();
+      Game.detailLabel = this.GetDetailLabel();
+      Game.detailValue = this.GetDetailValue();
 
       return Game;
     }
@@ -86,7 +87,7 @@ namespace SMG.Santas.RoundFlow
     /// label for the scoreboard to display.
     /// </summary>
     /// <returns></returns>
-    protected string GetDetailLabel()
+    protected virtual string GetDetailLabel()
     {
       return "";
     }
@@ -96,7 +97,7 @@ namespace SMG.Santas.RoundFlow
     /// value for the scoreboard to display.
     /// </summary>
     /// <returns></returns>
-    protected string GetDetailValue()
+    protected virtual string GetDetailValue()
     {
       return "";
     }

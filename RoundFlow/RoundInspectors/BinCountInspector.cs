@@ -23,11 +23,23 @@ namespace SMG.Santas.RoundFlow
       return "binCount";
     }
 
+    protected override string GetDetailLabel()
+    {
+      return "Required Bins";
+    }
+
+    protected override string GetDetailValue()
+    {
+      return _GameManager.CurrentRound.binCount.ToString() + " / " + maxBins.ToString();
+    }
+
     public override void Activate()
     {
       _EventSource.StartListening(RoundManager.EVENT_SCOREBIN_AFTER, HandleBinLimit);
       // set the target bins
       maxBins = _GameManager.CurrentRound.maxBins;
+
+      UpdateScoreboard();
     }
 
     public override void Deactivate()
