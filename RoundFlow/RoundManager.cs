@@ -57,6 +57,11 @@ namespace SMG.Santas.RoundFlow
     string defaultScoringType = "StandardScoring";
 
     /// <summary>
+    /// The index of the current dispenser.  Used by GetNextDispenser()
+    /// </summary>
+    int currentDispenserIndex = 0;
+
+    /// <summary>
     /// Round inspectors by name, for different round types.
     /// </summary>
     Dictionary<string, IRoundInspector> _RoundInspectors = new Dictionary<string, IRoundInspector>();
@@ -324,12 +329,16 @@ namespace SMG.Santas.RoundFlow
 
     /// <summary>
     /// Find the next dispenser in the list
-    /// @TODO current implementation is a hack to get stuff going.  Do it right!
     /// </summary>
     /// <returns></returns>
     public Dispenser GetNextDispenser()
     {
-      return knownDispensers[1];
+      currentDispenserIndex++;
+      if (currentDispenserIndex == knownDispensers.Count) {
+        currentDispenserIndex = 0;
+      }
+
+      return knownDispensers[currentDispenserIndex];
     }
 
     [System.Serializable]

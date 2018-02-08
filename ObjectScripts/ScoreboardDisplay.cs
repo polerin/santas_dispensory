@@ -58,6 +58,7 @@ namespace SMG.Santas.ObjectScripts
       _EventSource = EventSource;
 
       _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);
+      _EventSource.StartListening(GameManager.EVENT_GAMEEND_AFTER, DisplayEndOfGame);
     }
 
     private void OnDestroy()
@@ -66,14 +67,15 @@ namespace SMG.Santas.ObjectScripts
         return;
       }
 
-      _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);  
+      _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);
+      _EventSource.StopListening(GameManager.EVENT_GAMEEND_AFTER, DisplayEndOfGame);
     }
 
 
     protected void DisplayFullText()
     {
       DetailCanvas.enabled = false;
-      FullCanvas.enabled = false;
+      FullCanvas.enabled = true;
     }
 
     protected void DisplayFullText(string newText)
@@ -89,6 +91,14 @@ namespace SMG.Santas.ObjectScripts
     {
       FullCanvas.enabled = false;
       DetailCanvas.enabled = true;
+    }
+
+    /// <summary>
+    /// @TODO Give end of game stats, scroll? 
+    /// </summary>
+    protected void DisplayEndOfGame()
+    {
+      DisplayFullText("Game Over!");
     }
 
     public void RefreshDetails(GameDescriptor Game)
