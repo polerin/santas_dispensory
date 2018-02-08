@@ -1,7 +1,8 @@
 using UnityEngine;
 using Zenject;
+using GameEventBus.Interfaces;
 
-using SMG.Coordination;
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -19,10 +20,10 @@ namespace SMG.Santas.RoundFlow
     TickableManager _TickableManager;
 
     public PartnerControlSet(
-      EventSource EventSource,
+      IEventBus<IEvent> EventBus,
       TickableManager TickableManager,
       Settings Settings)
-      : base(EventSource)
+      : base(EventBus)
     {
       _Settings = Settings;
       _TickableManager = TickableManager;
@@ -30,23 +31,24 @@ namespace SMG.Santas.RoundFlow
 
     public void Tick()
     {
-      // @TODO make this not crap
+      // @TODO make this not annoying
       if (Input.GetKeyDown(KeyCode.Keypad1)) {
-        DispenseBear();
+        DispenseItem(CatchTypes.Bear);
       }
 
       if (Input.GetKeyDown(KeyCode.Keypad2)) {
-        DispenseBall();
+        DispenseItem(CatchTypes.Ball);
       }
 
       if (Input.GetKeyDown(KeyCode.Keypad3)) {
-        DispensePresent();
+        DispenseItem(CatchTypes.Present);
       }
 
       if (Input.GetKeyDown(KeyCode.Keypad4)) {
-        DispenseHorse();
+        DispenseItem(CatchTypes.Horse);
       }
     }
+
     public override string Slug()
     {
       return "partnerControlSet";

@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using GameEventBus.Interfaces;
 
-using SMG.Coordination;
 using SMG.Santas.GameManagement;
-using SMG.Santas.Scoring;
-using SMG.Santas.ObjectScripts;
 
 
 namespace SMG.Santas.Scoring
@@ -19,7 +15,7 @@ namespace SMG.Santas.Scoring
     // UnityAction m_GameStartAction;
     // private UnityAction m_GameEndAction;
 
-    EventSource _EventSource;
+    IEventBus<IEvent> _EventBus;
     GameManager _GameManager;
 
     List<int> roundScores = new List<int>();
@@ -33,12 +29,12 @@ namespace SMG.Santas.Scoring
     /**
 		 * Constructor
 		 */
-    public ScoreKeeper(GameManager GameManager, EventSource _EventSource)
+    public ScoreKeeper(GameManager GameManager, IEventBus<IEvent> _EventBus)
     {
       this._GameManager = GameManager;
 
-      // _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
-      // _EventSource.StartListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+      // _EventBus.Subscribe(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+      // _EventBus.Subscribe(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
 
       // Register our StartGame() with our unity action.
       // this.m_GameStartAction += this.StartGame;
@@ -47,12 +43,12 @@ namespace SMG.Santas.Scoring
 
     ~ScoreKeeper()
     {
-      if (_EventSource == null) {
+      if (_EventBus == null) {
         return;
       }
 
-      // _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
-      // _EventSource.StopListening(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
+      // _EventBus.Unsubscribe(GameManager.EVENT_GAMESTART_AFTER, this.m_GameStartAction);
+      // _EventBus.Unsubscribe(GameManager.EVENT_GAMEEND, this.m_GameEndAction);
     }
 
     public void AddToScore(PresentList binList)

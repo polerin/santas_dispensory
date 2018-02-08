@@ -1,13 +1,14 @@
 using UnityEngine;
 using Zenject;
-using SMG.Coordination;
+using GameEventBus;
+using GameEventBus.Interfaces;
+
 using SMG.Coordination.Pools;
 
 using SMG.Santas.Scoring;
 using SMG.Santas.GameManagement;
 using SMG.Santas.RoundFlow;
 using SMG.Santas.ObjectScripts;
-
 
 namespace SMG.Santas.Coordination
 {
@@ -18,10 +19,13 @@ namespace SMG.Santas.Coordination
   {
     [SerializeField, Tooltip("Settings passed to the CatchMeScript memory pools.")]
     private MemoryPoolSettings CatchMePoolSettings;
+
     [SerializeField, Tooltip("Settings passed to the Round Manager.")]
     private RoundManager.Settings RoundManagerSettings;
+
     [SerializeField, Tooltip("Control settings for the 2 player partner game type.")]
     private PartnerControlSet.Settings PartnerControlSetSettings;
+
     [SerializeField, Tooltip("Control settings for the solo play game type.")]
     private SoloControlSet.Settings SoloControlSetSettings;
 
@@ -35,7 +39,7 @@ namespace SMG.Santas.Coordination
 
       // This is the main event bus.  It is required by all managers, and many
       // control oriented GameObjects.
-      Container.Bind<EventSource>().AsSingle();
+      Container.BindInterfacesAndSelfTo<EventBus<IEvent>>().AsSingle();
 
       // These are overall game state managers.  They generally defer thier
       // implementation to event listeners or supplied strategies.

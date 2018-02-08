@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using Zenject;
+using GameEventBus.Interfaces;
 using VRTK.Controllables;
 using VRTK.Controllables.ArtificialBased;
 
-using SMG.Coordination;
 using SMG.Santas.GameManagement;
+using SMG.Santas.Coordination.Events;
 
 namespace SMG.Santas.ObjectScripts
 {
@@ -28,10 +28,13 @@ namespace SMG.Santas.ObjectScripts
     [SerializeField, Tooltip("The root object. If not set it will default to the parent of this script")]
     private GameObject parentObj;
 
+    [SerializeField, Tooltip("The type of game this lever will start.")]
+    private GameTypes GameType;
+
     /// <summary>
     /// The event bus.  Used to listen for game start/end, and send off "Hey start now!" 
     /// </summary>
-    private EventSource _EventSource;
+    private IEventBus<IEvent> _EventBus;
 
     /// <summary>
     /// The size the lever should be when active.
@@ -52,7 +55,6 @@ namespace SMG.Santas.ObjectScripts
     /// Start time for the hiding animation
     /// </summary>
     private float startTime;
-
 
     /// <summary>
     /// Handling setup stuff here, focusing Init for injection.
@@ -75,10 +77,10 @@ namespace SMG.Santas.ObjectScripts
     }
 
     [Inject]
-    public void Init(EventSource EventSource)
+    public void Init(IEventBus<IEvent> EventBus)
     {
-      _EventSource = EventSource;
-      _EventSource.StartListening(GameManager.EVENT_GAMEEND_AFTER, ShowLever);
+      _EventBus = EventBus;
+      _EventBus.Subscribe<GameEndAfterEvent>(ShowLever);
     }
 
 
@@ -92,7 +94,7 @@ namespace SMG.Santas.ObjectScripts
       StartCoroutine(StartHideCoroutine(hideDuration, hideCurve));
 
       // TODO Fire off Particles?
-      _EventSource.TriggerEvent(GameManager.EVENT_GAMESTART);
+      _EventBus.Publish(new StartSignalEvent(GameType));
     }
 
     /// <summary>
@@ -126,7 +128,7 @@ namespace SMG.Santas.ObjectScripts
     /// <summary>
     /// Resets the lever to initial state
     /// </summary>
-    protected void ShowLever()
+    protected void ShowLever(IEvent Event)
     {
       parentObj.transform.localScale = InitialSize;
       ForceRestingPosition();

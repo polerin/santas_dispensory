@@ -1,9 +1,12 @@
-public enum GameTypes
+namespace SMG.Santas.GameManagement
 {
-  PartnerEasy,
-  PartnerNormal,
-  PartnerHard,
-  SoloEasy,
-  SoloNormal,
-  SoloHard
+  public enum GameTypes
+  {
+    PartnerEasy,
+    PartnerNormal,
+    PartnerHard,
+    SoloEasy,
+    SoloNormal,
+    SoloHard
+  }
 }

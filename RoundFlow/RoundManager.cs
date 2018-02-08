@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using GameEventBus.Interfaces;
 
-using SMG.Coordination;
+using SMG.Santas.Coordination.Events;
 using SMG.Santas.Scoring;
 using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
@@ -39,7 +40,7 @@ namespace SMG.Santas.RoundFlow
     /// <summary>
     /// Inject Event bus
     /// </summary>
-    EventSource _EventSource;
+    IEventBus<IEvent> _EventBus;
 
     /// <summary>
     /// Injected configuration.  This is used for prefab fetching
@@ -92,24 +93,20 @@ namespace SMG.Santas.RoundFlow
     /// <param name="Settings">Settings object, sourced in the Installer, set in the inspector</param>
     public RoundManager(
       GameManager Manager,
-      EventSource Source,
+      IEventBus<IEvent> Source,
       List<IRoundInspector> RoundInspectors,
       List<IScoringStrategy> ScoringStrategies,
       Settings Settings)
     {
 
       _GameManager = Manager;
-      _EventSource = Source;
+      _EventBus = Source;
       _Settings = Settings;
 
-      _EventSource.StartListening(GameManager.EVENT_ROUNDSTART, StartRound);
-      _EventSource.StartListening(GameManager.EVENT_GAMEEND, EndRound);
-      _EventSource.StartListening(GameManager.EVENT_ROUNDEND, EndRound);
-
-      _EventSource.StartListening(Dispenser.DISPENSE_BEAR, DispenseBear);
-      _EventSource.StartListening(Dispenser.DISPENSE_BALL, DispenseBall);
-      _EventSource.StartListening(Dispenser.DISPENSE_PRESENT, DispensePresent);
-      _EventSource.StartListening(Dispenser.DISPENSE_HORSE, DispenseHorse);
+      _EventBus.Subscribe<RoundStartEvent>(StartRound);
+      _EventBus.Subscribe<GameEndEvent>(EndRound);
+      _EventBus.Subscribe<RoundEndEvent>(EndRound);
+      _EventBus.Subscribe<DispenseEvent>(DispenseItem);
 
       for (int i = 0; i < RoundInspectors.Count; i++) {
         RoundInspectors[i].Inspect(this);
@@ -122,22 +119,18 @@ namespace SMG.Santas.RoundFlow
     }
 
     /// <summary>
-    /// Destructor, unregister listeners if the eventsource still exists.
+    /// Destructor, unregister listeners if the IEventBus<IEvent> still exists.
     /// </summary>
     ~RoundManager()
     {
-      if (_EventSource == null) {
+      if (_EventBus == null) {
         return;
       }
 
-      _EventSource.StopListening(GameManager.EVENT_ROUNDSTART, StartRound);
-      _EventSource.StopListening(GameManager.EVENT_GAMEEND, EndRound);
-      _EventSource.StopListening(GameManager.EVENT_ROUNDEND, EndRound);
-
-      _EventSource.StopListening(Dispenser.DISPENSE_BEAR, DispenseBear);
-      _EventSource.StopListening(Dispenser.DISPENSE_BEAR, DispenseBall);
-      _EventSource.StopListening(Dispenser.DISPENSE_BEAR, DispensePresent);
-      _EventSource.StopListening(Dispenser.DISPENSE_BEAR, DispenseHorse);
+      _EventBus.Unsubscribe<RoundStartEvent>(StartRound);
+      _EventBus.Unsubscribe<GameEndEvent>(EndRound);
+      _EventBus.Unsubscribe<RoundEndEvent>(EndRound);
+      _EventBus.Unsubscribe<DispenseEvent>(DispenseItem);
     }
 
     /// <summary>
@@ -168,24 +161,29 @@ namespace SMG.Santas.RoundFlow
     /// Load up the right round inspector, activate the appropriate bins and dispensers.
     /// @TODO when I have event params figured out, use the passed round definition.
     /// </summary>
-    protected void StartRound()
+    protected void StartRound(RoundStartEvent StartEvent)
     {
       if (!_GameManager.GameState()) {
+        Debug.LogWarning("Attempting to start a round for a game that is not started");
         return;
       }
+      RoundDefinition CurrentRound = StartEvent.Round;
 
-      RoundDefinition CurrentRound = _GameManager.CurrentRound;
-
+      Debug.Log("sfasdfaf");
       SetRoundInspector(CurrentRound);
+      Debug.Log("one");
       SetScoringStrategy(CurrentRound);
+      Debug.Log("two");
       ResetBins(CurrentRound);
+      Debug.Log("Threee");
       ActivateDispensers(CurrentRound);
+      Debug.Log("aaaaaaaaa?)");
     }
 
     /// <summary>
     /// End the current round, deactivating bins and dispensers.
     /// </summary>
-    protected void EndRound()
+    protected void EndRound(IEvent Event)
     {
       if (!_GameManager.GameState()) {
         return;
@@ -207,7 +205,7 @@ namespace SMG.Santas.RoundFlow
       if (_RoundInspectors.TryGetValue(CurrentRound.roundType, out TargetInspector)) {
         CurrentRoundInspector = TargetInspector;
       } else {
-        Debug.Log("Round type not found in inspector list: " + CurrentRound.roundType);
+        Debug.LogWarning("Round type not found in inspector list: " + CurrentRound.roundType);
         CurrentRoundInspector = _RoundInspectors[defaultRoundType];
       }
 
@@ -225,11 +223,9 @@ namespace SMG.Santas.RoundFlow
       if (_ScoringStrategies.TryGetValue(Round.scoreType, out TargetStrategy)) {
         CurrentScoringStrategy = TargetStrategy;
       } else {
-        Debug.Log("Scoring type not found in strategy list: " + Round.scoreType);
+        Debug.LogWarning("Scoring type not found in strategy list: " + Round.scoreType);
         CurrentScoringStrategy = _ScoringStrategies[defaultScoringType];
       }
-
-      CurrentRoundInspector.Activate();
     }
 
      
@@ -241,7 +237,9 @@ namespace SMG.Santas.RoundFlow
     /// <param name="Round"></param>
     protected void ActivateDispensers(RoundDefinition Round)
     {
+      Debug.Log("DispenserCount: " + knownDispensers.Count);
       for (int i = 0; i < knownDispensers.Count; i++) {
+        Debug.Log("Activate " + i);
         knownDispensers[i].Activate();
       }
     }
@@ -286,8 +284,6 @@ namespace SMG.Santas.RoundFlow
     /// <param name="SubjectBin"></param>
     public void ScoreBin(Collector SubjectBin)
     {
-      _EventSource.TriggerEvent(RoundManager.EVENT_SCOREBIN);
-
       PresentList BinList = CurrentScoringStrategy.ScoreBin(SubjectBin);
 
       _GameManager.CurrentGame.AddScore(BinList);
@@ -296,7 +292,7 @@ namespace SMG.Santas.RoundFlow
         _GameManager.AddError();
       }
 
-      _EventSource.TriggerEvent(RoundManager.EVENT_SCOREBIN_AFTER);
+      _EventBus.Publish(new ScoreBinEvent(SubjectBin, _GameManager.CurrentRound));
 
       SubjectBin.Reset();
     }
@@ -306,25 +302,30 @@ namespace SMG.Santas.RoundFlow
      * These methods are individual implementations as I was stuck on the event bus with params.
 		 */ 
 
-    public void DispenseBear()
+    public void DispenseItem(DispenseEvent DispenseEvent)
     {
-      GetNextDispenser().DispenseItem(_Settings.BearPrefab);
+      CatchTypes SubjectType = DispenseEvent.CatchType;
+      Debug.Log("Prepping DispenseItem: " + SubjectType);
+
+      switch (SubjectType) {
+        case CatchTypes.Bear:
+          Debug.Log("Dispensing Bear");
+          GetNextDispenser().DispenseItem(_Settings.BearPrefab);
+          break;
+       case CatchTypes.Ball: 
+          GetNextDispenser().DispenseItem(_Settings.BallPrefab);
+          break;
+
+       case CatchTypes.Present: 
+          GetNextDispenser().DispenseItem(_Settings.PresentPrefab);
+          break;
+
+       case CatchTypes.Horse: 
+          GetNextDispenser().DispenseItem(_Settings.HorsePrefab);
+          break;
+      }
     }
 
-    public void DispenseBall()
-    {
-      GetNextDispenser().DispenseItem(_Settings.BallPrefab);
-    }
-
-    public void DispensePresent()
-    {
-      GetNextDispenser().DispenseItem(_Settings.PresentPrefab);
-    }
-
-    public void DispenseHorse()
-    {
-      GetNextDispenser().DispenseItem(_Settings.HorsePrefab);
-    }
 
 
     /// <summary>

@@ -1,6 +1,8 @@
-using SMG.Coordination;
+using GameEventBus.Interfaces;
 using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
+
+using SMG.Santas.Coordination.Events;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -9,7 +11,7 @@ namespace SMG.Santas.RoundFlow
 
     int maxBins;
 
-    public BinCountInspector(EventSource Source, GameManager GameManager, ScoreboardDisplay Scoreboard) : base(Source, GameManager, Scoreboard)
+    public BinCountInspector(IEventBus<IEvent> EventBus, GameManager GameManager, ScoreboardDisplay Scoreboard) : base(EventBus, GameManager, Scoreboard)
     {
     }
 
@@ -35,7 +37,7 @@ namespace SMG.Santas.RoundFlow
 
     public override void Activate()
     {
-      _EventSource.StartListening(RoundManager.EVENT_SCOREBIN_AFTER, HandleBinLimit);
+      _EventBus.Subscribe<ScoreBinEvent>(HandleBinLimit); ;
       // set the target bins
       maxBins = _GameManager.CurrentRound.maxBins;
 
@@ -44,13 +46,13 @@ namespace SMG.Santas.RoundFlow
 
     public override void Deactivate()
     {
-      _EventSource.StopListening(RoundManager.EVENT_SCOREBIN_AFTER, HandleBinLimit);
+      _EventBus.Unsubscribe<ScoreBinEvent>(HandleBinLimit);
     }
 
-    public void HandleBinLimit()
+    public void HandleBinLimit(ScoreBinEvent ScoreEvent)
     {
       if (_GameManager.CurrentRound.binCount >= maxBins) {
-        _EventSource.TriggerEvent(AbstractRoundInspector.EVENT_CONDITION_SUCCESS);
+        _EventBus.Publish(new RoundSuccessEvent(_GameManager.CurrentRound, GetGameDescription()));
       }
     }
   }

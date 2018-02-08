@@ -1,5 +1,8 @@
 using System;
-using SMG.Coordination;
+using UnityEngine;
+using GameEventBus.Interfaces;
+
+using SMG.Santas.Coordination.Events;
 using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow
@@ -7,13 +10,13 @@ namespace SMG.Santas.RoundFlow
   /// @TODO should the dispenses be individual methods one with a param?
   public abstract class AbstractControlSet : IControlSet
   {
-    protected EventSource _EventSource;
+    protected IEventBus<IEvent> _EventBus;
 
     protected bool isActive = false;
 
-    public AbstractControlSet(EventSource EventSource)
+    public AbstractControlSet(IEventBus<IEvent> EventBus)
     {
-        _EventSource = EventSource;
+        _EventBus = EventBus;
     }
 
     protected void DispenseRandom()
@@ -22,24 +25,10 @@ namespace SMG.Santas.RoundFlow
       throw new NotImplementedException();
     }
 
-    protected void DispenseBear()
+    protected void DispenseItem(CatchTypes DesiredType)
     {
-      _EventSource.TriggerEvent(Dispenser.DISPENSE_BEAR);
-    }
-
-    protected void DispenseBall()
-    {
-      _EventSource.TriggerEvent(Dispenser.DISPENSE_BALL);
-    }
-
-    protected void DispensePresent()
-    {
-      _EventSource.TriggerEvent(Dispenser.DISPENSE_PRESENT);
-    }
-
-    protected void DispenseHorse()
-    {
-      _EventSource.TriggerEvent(Dispenser.DISPENSE_PRESENT);
+      Debug.Log("Dispensing Item" + DesiredType);
+      _EventBus.Publish(new DispenseEvent(DesiredType));
     }
 
     public abstract string Slug();

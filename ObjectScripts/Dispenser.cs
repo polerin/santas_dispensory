@@ -1,23 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 using Zenject;
 
-using SMG.Coordination;
 using SMG.Coordination.Pools;
 using SMG.Santas.RoundFlow;
-using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.ObjectScripts
 {
   public class Dispenser : MonoBehaviour
   {
-    public const string DISPENSE_BEAR = "dispenser_send_bear";
-    public const string DISPENSE_BALL = "dispenser_send_ball";
-    public const string DISPENSE_PRESENT = "dispenser_send_present";
-    public const string DISPENSE_HORSE = "dispenser_send_horse";
-
     public float shootSpeed = 8.5f;
     public float shootWindow = .5f;
 
@@ -65,7 +55,9 @@ namespace SMG.Santas.ObjectScripts
     // public interface, negation logic and filtering should be here
     public void DispenseItem(GameObject Prefab)
     {
+        Debug.Log("InDispensasdfasdf");
       if (dispenserActive) {
+        Debug.Log("yep it are here");
         SpawnItem(Prefab);
       }
     }

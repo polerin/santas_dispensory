@@ -1,7 +1,6 @@
-using UnityEngine;
 using UnityEngine.Events;
+using GameEventBus.Interfaces;
 
-using SMG.Coordination;
 using SMG.Santas.GameManagement;
 using SMG.Santas.ObjectScripts;
 
@@ -9,15 +8,12 @@ namespace SMG.Santas.RoundFlow
 {
   public abstract class AbstractRoundInspector : IRoundInspector
   {
-    public const string EVENT_CONDITION_SUCCESS = "inspector sees success";
-    public const string EVENT_CONDITION_FAILURE = "inspector sees failure";
-
     protected UnityAction m_RoundStartAction;
     protected UnityAction m_RoundEndAction;
     protected UnityAction m_ScoreAction;
     protected UnityAction m_ErrorAction;
 
-    protected EventSource _EventSource;
+    protected IEventBus<IEvent> _EventBus;
     protected RoundManager _RoundManager;
     protected GameManager _GameManager;
     protected ScoreboardDisplay _Scoreboard;
@@ -35,9 +31,9 @@ namespace SMG.Santas.RoundFlow
     /// </summary>
     protected string DetailValue;
 
-    public AbstractRoundInspector(EventSource Source, GameManager GameManager, ScoreboardDisplay Scoreboard)
+    public AbstractRoundInspector(IEventBus<IEvent> Source, GameManager GameManager, ScoreboardDisplay Scoreboard)
     {
-      this._EventSource = Source;
+      this._EventBus = Source;
       this._GameManager = GameManager;
       this._Scoreboard = Scoreboard;
     }

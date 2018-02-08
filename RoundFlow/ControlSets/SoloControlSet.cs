@@ -1,8 +1,8 @@
 using UnityEngine;
 using System.Threading;
 using System.Threading.Tasks;
+using GameEventBus.Interfaces;
 
-using SMG.Coordination;
 using System;
 
 namespace SMG.Santas.RoundFlow
@@ -21,9 +21,9 @@ namespace SMG.Santas.RoundFlow
     CancellationTokenSource TokenSource;
 
     public SoloControlSet(
-      EventSource EventSource,
+      IEventBus<IEvent> EventBus,
       Settings Settings)
-      : base(EventSource)
+      : base(EventBus)
     {
       _Settings = Settings;
       TokenSource = new CancellationTokenSource();

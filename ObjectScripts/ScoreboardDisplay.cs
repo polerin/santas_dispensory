@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using GameEventBus.Interfaces;
 using Zenject;
 
-using SMG.Coordination;
+using SMG.Santas.Coordination.Events;
 using SMG.Santas.GameManagement;
 
 namespace SMG.Santas.ObjectScripts
@@ -45,7 +46,7 @@ namespace SMG.Santas.ObjectScripts
     /// <summary>
     /// Injected Event bus
     /// </summary>
-    EventSource _EventSource;
+    IEventBus<IEvent> _EventBus;
 
     void Start()
     {
@@ -53,22 +54,22 @@ namespace SMG.Santas.ObjectScripts
     }
 
     [Inject]
-    private void Init(EventSource EventSource)
+    private void Init(IEventBus<IEvent> EventBus)
     {
-      _EventSource = EventSource;
+      _EventBus = EventBus;
 
-      _EventSource.StartListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);
-      _EventSource.StartListening(GameManager.EVENT_GAMEEND_AFTER, DisplayEndOfGame);
+      _EventBus.Subscribe<GameStartEvent>(DisplayDetails);
+      _EventBus.Subscribe<GameEndAfterEvent>(DisplayEndOfGame);
     }
 
     private void OnDestroy()
     {
-      if (_EventSource == null) {
+      if (_EventBus == null) {
         return;
       }
 
-      _EventSource.StopListening(GameManager.EVENT_GAMESTART_AFTER, DisplayDetails);
-      _EventSource.StopListening(GameManager.EVENT_GAMEEND_AFTER, DisplayEndOfGame);
+      _EventBus.Unsubscribe<GameStartEvent>(DisplayDetails);
+      _EventBus.Unsubscribe<GameEndAfterEvent>(DisplayEndOfGame);
     }
 
 
@@ -87,7 +88,7 @@ namespace SMG.Santas.ObjectScripts
       DisplayFullText();
     }
 
-    protected void DisplayDetails()
+    protected void DisplayDetails(GameStartEvent StartEvent)
     {
       FullCanvas.enabled = false;
       DetailCanvas.enabled = true;
@@ -96,7 +97,7 @@ namespace SMG.Santas.ObjectScripts
     /// <summary>
     /// @TODO Give end of game stats, scroll? 
     /// </summary>
-    protected void DisplayEndOfGame()
+    protected void DisplayEndOfGame(GameEndAfterEvent EndEvent)
     {
       DisplayFullText("Game Over!");
     }
