@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 using GameEventBus.Interfaces;
@@ -67,9 +68,12 @@ namespace SMG.Santas.RoundFlow
       isActive = false;
       _TickableManager.Remove(this);
     }
+
+    [Serializable]
     public class Settings
     {
-
+      [Tooltip("How long should this controlset wait before allowing another dispense event.")]
+      public int dispenseDelay = 400;
     }
   }
 }

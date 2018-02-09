@@ -16,13 +16,8 @@ namespace SMG.Santas.RoundFlow
 
     public AbstractControlSet(IEventBus<IEvent> EventBus)
     {
-        _EventBus = EventBus;
-    }
+      _EventBus = EventBus;
 
-    protected void DispenseRandom()
-    {
-      // @TODO: Implement me.  No, really.  Needed for SoloControlSet
-      throw new NotImplementedException();
     }
 
     protected void DispenseItem(CatchTypes DesiredType)

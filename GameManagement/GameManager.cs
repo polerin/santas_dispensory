@@ -225,7 +225,7 @@ namespace SMG.Santas.GameManagement
       TextAsset GameJson = (TextAsset)Resources.Load(ResourcePath);
 
       if (GameJson == null) {
-        // throw something here?
+        Debug.LogWarning("Unable to load requested game type: " + ResourcePath);
         return GameManager.DEFAULT_GAMEDEF;
       }
 

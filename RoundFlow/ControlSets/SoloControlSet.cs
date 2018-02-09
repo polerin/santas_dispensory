@@ -1,9 +1,10 @@
 using UnityEngine;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GameEventBus.Interfaces;
 
-using System;
+using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -13,6 +14,16 @@ namespace SMG.Santas.RoundFlow
     /// Injected settings, set in the Installer via the Unity Inspector.
     /// </summary>
     private Settings _Settings;
+
+    /// <summary>
+    /// Random source for DispenseRandom()
+    /// </summary>
+    private System.Random Random;
+
+    /// <summary>
+    /// List of Catchable types, used for DispenseRandom()
+    /// </summary>
+    private Array ItemTypes;
 
     /// <summary>
     /// This token source is used to safely cancel the await.
@@ -27,6 +38,8 @@ namespace SMG.Santas.RoundFlow
     {
       _Settings = Settings;
       TokenSource = new CancellationTokenSource();
+      Random = new System.Random();
+      ItemTypes = Enum.GetValues(typeof(CatchTypes));
     }
 
     public void Dispose()
@@ -67,13 +80,19 @@ namespace SMG.Santas.RoundFlow
           DispenseRandom();
           await Task.Delay(dispenseDelay, CancelMe);
         }
+
       } catch (AggregateException ae) {
         //ignoring, we know it'll be canceled at some point.
         Debug.Log("SoloControlSet dispense stopped.");
       }
     }
 
+    protected void DispenseRandom()
+    {
+      DispenseItem((CatchTypes)ItemTypes.GetValue(Random.Next(ItemTypes.Length))); 
+    }
 
+    [Serializable]
     public class Settings
     {
       [Tooltip("The millisecond delay between dispense events.")]
