@@ -169,15 +169,10 @@ namespace SMG.Santas.RoundFlow
       }
       RoundDefinition CurrentRound = StartEvent.Round;
 
-      Debug.Log("sfasdfaf");
       SetRoundInspector(CurrentRound);
-      Debug.Log("one");
       SetScoringStrategy(CurrentRound);
-      Debug.Log("two");
       ResetBins(CurrentRound);
-      Debug.Log("Threee");
       ActivateDispensers(CurrentRound);
-      Debug.Log("aaaaaaaaa?)");
     }
 
     /// <summary>
@@ -237,9 +232,7 @@ namespace SMG.Santas.RoundFlow
     /// <param name="Round"></param>
     protected void ActivateDispensers(RoundDefinition Round)
     {
-      Debug.Log("DispenserCount: " + knownDispensers.Count);
       for (int i = 0; i < knownDispensers.Count; i++) {
-        Debug.Log("Activate " + i);
         knownDispensers[i].Activate();
       }
     }
@@ -305,11 +298,9 @@ namespace SMG.Santas.RoundFlow
     public void DispenseItem(DispenseEvent DispenseEvent)
     {
       CatchTypes SubjectType = DispenseEvent.CatchType;
-      Debug.Log("Prepping DispenseItem: " + SubjectType);
 
       switch (SubjectType) {
         case CatchTypes.Bear:
-          Debug.Log("Dispensing Bear");
           GetNextDispenser().DispenseItem(_Settings.BearPrefab);
           break;
        case CatchTypes.Ball: 

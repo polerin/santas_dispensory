@@ -41,10 +41,10 @@ namespace SMG.Santas.RoundFlow
       Random = new System.Random();
       ItemTypes = Enum.GetValues(typeof(CatchTypes));
     }
-
+    
     public void Dispose()
     {
-      TokenSource.Dispose();
+      DestroyTokenSource();
     }
 
     public override string Slug()
@@ -80,7 +80,6 @@ namespace SMG.Santas.RoundFlow
           DispenseRandom();
           await Task.Delay(dispenseDelay, CancelMe);
         }
-
       } catch (AggregateException ae) {
         //ignoring, we know it'll be canceled at some point.
         Debug.Log("SoloControlSet dispense stopped.");
@@ -90,6 +89,21 @@ namespace SMG.Santas.RoundFlow
     protected void DispenseRandom()
     {
       DispenseItem((CatchTypes)ItemTypes.GetValue(Random.Next(ItemTypes.Length))); 
+    }
+
+    protected void DestroyTokenSource()
+    {
+      if (TokenSource == null) {
+        return;
+      }
+      Debug.Log("Destroying Token Source");
+      TokenSource.Cancel();
+      TokenSource.Dispose();
+
+      // making sure we have actually stopped the generation
+      Task.Delay(150).Wait();
+      Debug.Log("TokenSourceDestroyed");
+      TokenSource = null;
     }
 
     [Serializable]

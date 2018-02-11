@@ -55,9 +55,7 @@ namespace SMG.Santas.ObjectScripts
     // public interface, negation logic and filtering should be here
     public void DispenseItem(GameObject Prefab)
     {
-        Debug.Log("InDispensasdfasdf");
       if (dispenserActive) {
-        Debug.Log("yep it are here");
         SpawnItem(Prefab);
       }
     }

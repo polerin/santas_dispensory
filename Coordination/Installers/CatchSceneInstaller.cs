@@ -12,9 +12,10 @@ using SMG.Santas.ObjectScripts;
 
 namespace SMG.Santas.Coordination
 {
-  /**
-   * This is the zenject catchscene dependency injection mapping
-   */
+  /// <summary>
+  /// This is the Zenject Dependency injection mapping.  It also contains a centralized
+  /// place for settings to be configured.
+  /// </summary>
   public class CatchSceneInstaller : MonoInstaller<CatchSceneInstaller>
   {
     [SerializeField, Tooltip("Settings passed to the CatchMeScript memory pools.")]
@@ -76,7 +77,7 @@ namespace SMG.Santas.Coordination
       // ControlSets are resonsible for triggering the spawning of Catchable
       // objects.  They are provided to the Round Manager.
       Container.Bind<IControlSet>().To<PartnerControlSet>().AsSingle().WithArguments(PartnerControlSetSettings);
-      Container.Bind<IControlSet>().To<SoloControlSet>().AsSingle().WithArguments(SoloControlSetSettings);
+      Container.BindInterfacesAndSelfTo<SoloControlSet>().AsSingle().WithArguments(SoloControlSetSettings);
 
     }
 
