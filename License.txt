@@ -1,0 +1,6 @@
+This code is currently not licensed for distribution or use other than as an
+example.  A F/OSS license will be chosen at a future date.  Basically, don't
+be a jerk and steal chunks without credit.
+
+Love,
+- Us
