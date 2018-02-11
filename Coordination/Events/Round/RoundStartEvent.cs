@@ -5,7 +5,7 @@ namespace SMG.Santas.Coordination.Events
 {
   public class RoundStartEvent : EventBase
   {
-    public RoundDefinition Round;
+    readonly public RoundDefinition Round;
 
     public RoundStartEvent(RoundDefinition subject)
     {

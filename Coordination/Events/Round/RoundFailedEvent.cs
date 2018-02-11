@@ -6,8 +6,8 @@ namespace SMG.Santas.Coordination.Events
 {
   public class RoundFailedEvent : EventBase
   {
-    public RoundDefinition Round;
-    public Game Game;
+    readonly public RoundDefinition Round;
+    readonly public Game Game;
 
     public RoundFailedEvent(RoundDefinition subject, Game subjectGame)
     {

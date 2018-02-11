@@ -7,8 +7,8 @@ namespace SMG.Santas.Coordination.Events
 {
   public class RoundSuccessEvent : EventBase
   {
-    public RoundDefinition Round;
-    public GameDescriptor GameDescription;
+    readonly public RoundDefinition Round;
+    readonly public GameDescriptor GameDescription;
 
     public RoundSuccessEvent(RoundDefinition subjectRound, GameDescriptor subjectGameDescription)
     {

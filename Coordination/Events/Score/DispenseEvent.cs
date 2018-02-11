@@ -6,7 +6,7 @@ namespace SMG.Santas.Coordination.Events
 {
   public class DispenseEvent : EventBase
   {
-    public CatchTypes CatchType;
+    readonly public CatchTypes CatchType;
 
     public DispenseEvent(CatchTypes type)
     {

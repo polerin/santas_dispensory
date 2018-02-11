@@ -6,7 +6,7 @@ namespace SMG.Santas.Coordination.Events
 {
   public class StartSignalEvent : EventBase
   {
-    public GameTypes GameType;
+    readonly public GameTypes GameType;
 
     public StartSignalEvent(GameTypes type)
     {
