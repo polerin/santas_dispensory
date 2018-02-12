@@ -11,11 +11,11 @@ namespace SMG.Santas.Scoring
       return this.GetType().Name;
     }
 
-    public PresentList ScoreBin(Collector SubjectBin)
+    public ScoreResult ScoreBin(Collector SubjectBin)
     {
       return ScoreList(SubjectBin.GetPresentList(), SubjectBin.GetContentCount());
     }
 
-    public abstract PresentList ScoreList(PresentList binList, Dictionary<CatchTypes, int> binContents);
+    public abstract ScoreResult ScoreList(PresentList binList, Dictionary<CatchTypes, int> binContents);
   }
 }

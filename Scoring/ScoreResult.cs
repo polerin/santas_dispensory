@@ -2,8 +2,8 @@
 {
   public struct ScoreResult
   {
-    bool scoreSuccessful;
-    int scoreChange;
-    int itemCount;
+    public bool scoreSuccessful;
+    public int scoreChange;
+    public int itemCount;
   }
 }

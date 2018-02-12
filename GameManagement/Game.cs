@@ -56,9 +56,9 @@ namespace SMG.Santas.GameManagement
       return (currentErrors >= AllowedErrors);
     }
 
-    public int AddScore(PresentList binList)
+    public int AddScore(ScoreResult Score)
     {
-      return AddScore(binList.Score());
+      return AddScore(Score.scoreChange);
     }
 
     public int AddScore(int points)
@@ -75,6 +75,11 @@ namespace SMG.Santas.GameManagement
     public int AddScoreToRound(int score, int round)
     {
       return 0;
+    }
+
+    public void AddBin()
+    {
+      CurrentRound.binCount++;
     }
 
     // @todo make this not a nasty stub.

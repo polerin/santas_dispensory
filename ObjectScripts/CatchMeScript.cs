@@ -103,7 +103,6 @@ namespace SMG.Santas.ObjectScripts
     /// <param name="Container"></param>
     public void MarkCollectedBy(Collector Container)
     {
-      Debug.Log("MARKED COLLECTED");
       isCollected = true;
       MarkStayAlive();
     }

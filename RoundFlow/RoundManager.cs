@@ -169,10 +169,11 @@ namespace SMG.Santas.RoundFlow
       }
       RoundDefinition CurrentRound = StartEvent.Round;
 
-      SetRoundInspector(CurrentRound);
-      SetScoringStrategy(CurrentRound);
       ResetBins(CurrentRound);
       ActivateDispensers(CurrentRound);
+
+      SetRoundInspector(CurrentRound);
+      SetScoringStrategy(CurrentRound);
     }
 
     /// <summary>
@@ -277,23 +278,23 @@ namespace SMG.Santas.RoundFlow
     /// <param name="SubjectBin"></param>
     public void ScoreBin(Collector SubjectBin)
     {
-      PresentList BinList = CurrentScoringStrategy.ScoreBin(SubjectBin);
+      ScoreResult ScoreResult = CurrentScoringStrategy.ScoreBin(SubjectBin);
 
-      _GameManager.CurrentGame.AddScore(BinList);
+      _GameManager.CurrentGame.AddScore(ScoreResult);
+      _GameManager.CurrentGame.AddBin();
 
-      if (!BinList.SuccessfulScoring()) {
+      Debug.Log("Score result:");
+      Debug.Log(ScoreResult);
+      if (!ScoreResult.scoreSuccessful) {
+        Debug.Log("Not successful!");
         _GameManager.AddError();
       }
 
-      _EventBus.Publish(new ScoreBinEvent(SubjectBin, _GameManager.CurrentRound));
+      _EventBus.Publish(new ScoreBinEvent(ScoreResult, SubjectBin, _GameManager.CurrentRound));
 
       SubjectBin.Reset();
     }
 
-    /**
-		 * All of this is annoying as heck,  Come back to it later with delegates I guess.
-     * These methods are individual implementations as I was stuck on the event bus with params.
-		 */ 
 
     public void DispenseItem(DispenseEvent DispenseEvent)
     {
@@ -303,6 +304,7 @@ namespace SMG.Santas.RoundFlow
         case CatchTypes.Bear:
           GetNextDispenser().DispenseItem(_Settings.BearPrefab);
           break;
+
        case CatchTypes.Ball: 
           GetNextDispenser().DispenseItem(_Settings.BallPrefab);
           break;

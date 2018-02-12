@@ -6,8 +6,8 @@ namespace SMG.Santas.Scoring
 {
   public interface IScoringStrategy
   {
-    PresentList ScoreBin(Collector SubjectBin);
-    PresentList ScoreList(PresentList BinList, Dictionary<CatchTypes, int> binContents);
+    ScoreResult ScoreBin(Collector SubjectBin);
+    ScoreResult ScoreList(PresentList BinList, Dictionary<CatchTypes, int> binContents);
     string Slug();
   }
 }

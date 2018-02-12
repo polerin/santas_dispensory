@@ -4,6 +4,8 @@ using SMG.Santas.ObjectScripts;
 
 using SMG.Santas.Coordination.Events;
 
+using UnityEngine;
+
 namespace SMG.Santas.RoundFlow
 {
   public class BinCountInspector : AbstractRoundInspector
@@ -37,20 +39,20 @@ namespace SMG.Santas.RoundFlow
 
     public override void Activate()
     {
-      _EventBus.Subscribe<ScoreBinEvent>(HandleBinLimit); ;
+      _EventBus.Subscribe<ScoreBinEvent>(HandleScoreBinEvent); ;
       // set the target bins
       maxBins = _GameManager.CurrentRound.maxBins;
-
       UpdateScoreboard();
     }
 
     public override void Deactivate()
     {
-      _EventBus.Unsubscribe<ScoreBinEvent>(HandleBinLimit);
+      _EventBus.Unsubscribe<ScoreBinEvent>(HandleScoreBinEvent);
     }
 
-    public void HandleBinLimit(ScoreBinEvent ScoreEvent)
+    public void HandleScoreBinEvent(ScoreBinEvent ScoreEvent)
     {
+      UpdateScoreboard();
       if (_GameManager.CurrentRound.binCount >= maxBins) {
         _EventBus.Publish(new RoundSuccessEvent(_GameManager.CurrentRound, GetGameDescription()));
       }

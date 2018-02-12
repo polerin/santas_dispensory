@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using SMG.Santas.ObjectScripts;
@@ -7,7 +8,7 @@ namespace SMG.Santas.Scoring
 
   public class StandardScoring : AbstractScoringStrategy
   {
-    Dictionary<CatchTypes, int> presentWorths = new Dictionary<CatchTypes, int>()
+    Dictionary<CatchTypes, int> PresentWorths = new Dictionary<CatchTypes, int>()
     {
       {CatchTypes.Ball, 10},
       {CatchTypes.Bear, 3},
@@ -15,30 +16,37 @@ namespace SMG.Santas.Scoring
       {CatchTypes.Horse, 5}
     };
 
-    public override PresentList ScoreList(PresentList binList, Dictionary<CatchTypes, int> binContents)
+    /// <summary>
+    /// Walk through the target list and the target 
+    /// </summary>
+    /// <param name="BinList">The target list of desired item counts</param>
+    /// <param name="BinContents">The contents of the bin</param>
+    /// <returns></returns>
+    public override ScoreResult ScoreList(PresentList BinList, Dictionary<CatchTypes, int> BinContents)
     {
-      Dictionary<CatchTypes, int> targetCounts = binList.Counts();
-      int listValue = 0;
-      int binVal;
-      int worthVal;
+      ScoreResult Result = new ScoreResult();
+      Dictionary<CatchTypes, int> TargetCounts = BinList.Counts();
 
-      foreach (KeyValuePair<CatchTypes, int> type in targetCounts) {
-        binContents.TryGetValue(type.Key, out binVal);
-        if (type.Value == binVal) {
-          this.presentWorths.TryGetValue(type.Key, out worthVal);
-          listValue += type.Value * worthVal;
+      foreach (KeyValuePair<CatchTypes, int> type in TargetCounts) {
+        // Dump out early if the bin doesn't have a required key, or the value doesn't match
+        if (!BinContents.ContainsKey(type.Key) || BinContents[type.Key] != type.Value) {
+          Result.scoreSuccessful = false;
+          Result.scoreChange = 0;
 
-        } else {
-          binList.SuccessfulScoring(false);
-          // Early exit when list scoring is not successful.
-          return binList;
+          return Result;
         }
+
+        if (!PresentWorths.ContainsKey(type.Key)) {
+          throw new InvalidOperationException("StandardScoring does not have a item value for type: " + type.Key);
+        }
+
+        Result.scoreChange += type.Value * PresentWorths[type.Key];
       }
 
-      binList.Score(listValue);
-      binList.SuccessfulScoring(true);
-
-      return binList;
+      Result.scoreSuccessful = true;
+      return Result;
     }
+
+    
   }
 }

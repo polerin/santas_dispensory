@@ -31,6 +31,8 @@ namespace SMG.Santas.Scoring
     {
       Dictionary<CatchTypes, int> temp = new Dictionary<CatchTypes, int>();
 
+      // Looping twice, as you cannot modify the second one while the loop is running?
+      // @TODO This is really annoying and there has to be a better way.
       foreach (CatchTypes key in presentCounts.Keys) {
         temp[key] = Random.Range(this.minCount, this.maxCount);
       }

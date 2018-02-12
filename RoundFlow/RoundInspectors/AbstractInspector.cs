@@ -62,7 +62,7 @@ namespace SMG.Santas.RoundFlow
     /// including any custom detail label and value.
     /// </summary>
     /// <returns></returns>
-    protected GameDescriptor GetGameDescription()
+    protected virtual GameDescriptor GetGameDescription()
     {
       GameDescriptor Game;
       if (_GameManager.GameState()) {

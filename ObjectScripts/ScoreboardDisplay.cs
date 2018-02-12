@@ -97,7 +97,7 @@ namespace SMG.Santas.ObjectScripts
     /// <summary>
     /// @TODO Give end of game stats, scroll? 
     /// </summary>
-    protected void DisplayEndOfGame(GameEndAfterEvent EndEvent)
+    protected void DisplayEndOfGame(IEvent EndEvent)
     {
       DisplayFullText("Game Over!");
     }
