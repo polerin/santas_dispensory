@@ -20,6 +20,7 @@ namespace SMG.Santas.ObjectScripts
     // @TODO inject these
     [SerializeField] ParticleSystem Particles;
     [SerializeField] GameObject PlayerObj;
+    [SerializeField] AudioSource DispenseNoise;
 
     bool dispenserActive = false;
 
@@ -63,7 +64,7 @@ namespace SMG.Santas.ObjectScripts
     // spawns an item regardless of state
     void SpawnItem(GameObject Prefab)
     {
-      Particles.Play();
+      
       CatchMeScript Item = _ItemPools.Spawn(Prefab);
 
       Vector3 target = PlayerObj.transform.position - gameObject.transform.position;
@@ -75,6 +76,18 @@ namespace SMG.Santas.ObjectScripts
       // Set initial position and speed.
       Item.SetInitial(gameObject.transform.position, velocity);
       Item.MarkForDestroy();
+    }
+
+    void SpawnEffects()
+    {
+      if (Particles != null) {
+        Particles.Play();
+      }
+
+      if (DispenseNoise != null) {
+        Debug.Log("POP!");
+        DispenseNoise.Play();
+      }
     }
 
     Vector3 getTargetVariance()
