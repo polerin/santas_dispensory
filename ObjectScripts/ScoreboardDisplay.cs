@@ -17,6 +17,12 @@ namespace SMG.Santas.ObjectScripts
     [SerializeField, Tooltip("The default string to be displayed on the FullCanvas text object")]
     string defaultFullText = "Pull the lever to start the game!";
 
+    [SerializeField, Tooltip("Text that will display during the pause before round start")]
+    string roundStartingText = "Next round is starting!";
+
+    [SerializeField, Tooltip("Text to display at the end of the game")]
+    string endOfGameText = "Game over!";
+
     [SerializeField,  Tooltip("The Canvas displayed before and after the game, takes up the entire width of the scoreboard.")]
     Canvas FullCanvas;
 
@@ -58,7 +64,8 @@ namespace SMG.Santas.ObjectScripts
     {
       _EventBus = EventBus;
 
-      _EventBus.Subscribe<GameStartEvent>(DisplayDetails);
+      _EventBus.Subscribe<RoundCountdownStartEvent>(DisplayRoundStarting);
+      _EventBus.Subscribe<RoundCountdownEndEvent>(DisplayDetails);
       _EventBus.Subscribe<GameEndAfterEvent>(DisplayEndOfGame);
     }
 
@@ -68,17 +75,25 @@ namespace SMG.Santas.ObjectScripts
         return;
       }
 
-      _EventBus.Unsubscribe<GameStartEvent>(DisplayDetails);
+      _EventBus.Unsubscribe<RoundCountdownStartEvent>(DisplayRoundStarting);
+      _EventBus.Unsubscribe<RoundCountdownEndEvent>(DisplayDetails);
       _EventBus.Unsubscribe<GameEndAfterEvent>(DisplayEndOfGame);
     }
 
 
+    /// <summary>
+    /// Hide the details canvas and show the full text canvas
+    /// </summary>
     protected void DisplayFullText()
     {
       DetailCanvas.enabled = false;
       FullCanvas.enabled = true;
     }
 
+    /// <summary>
+    /// Display the fulltext canvas with a specific message
+    /// </summary>
+    /// <param name="newText"></param>
     protected void DisplayFullText(string newText)
     {
       if (FullText != null) {
@@ -88,18 +103,32 @@ namespace SMG.Santas.ObjectScripts
       DisplayFullText();
     }
 
-    protected void DisplayDetails(GameStartEvent StartEvent)
+    /// <summary>
+    /// Hide the full text canvas, display the in-round details)
+    /// </summary>
+    /// <param name="StartEvent"></param>
+    protected void DisplayDetails(RoundCountdownEndEvent StartEvent)
     {
       FullCanvas.enabled = false;
       DetailCanvas.enabled = true;
     }
 
     /// <summary>
+    /// Update the scoreboard to show that the next round is starting
+    /// </summary>
+    /// <param name="StartEvent"></param>
+    protected void DisplayRoundStarting(RoundCountdownStartEvent StartEvent)
+    {
+      DisplayFullText(roundStartingText);
+    }
+
+    /// <summary>
+    /// Update the scoreboard to show the end of 
     /// @TODO Give end of game stats, scroll? 
     /// </summary>
     protected void DisplayEndOfGame(IEvent EndEvent)
     {
-      DisplayFullText("Game Over!");
+      DisplayFullText(endOfGameText);
     }
 
     public void RefreshDetails(GameDescriptor Game)

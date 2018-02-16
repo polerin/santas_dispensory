@@ -83,10 +83,10 @@ namespace SMG.Santas.GameManagement
     }
 
     // @todo make this not a nasty stub.
-    public Game AdvanceRound()
+    public RoundDefinition AdvanceRound()
     {
       CurrentRound = GenerateStubRoundDefinition();
-      return this;
+      return CurrentRound;
     }
 
     public GameDescriptor GetDescription()
@@ -105,7 +105,7 @@ namespace SMG.Santas.GameManagement
       Stub.scoreType = "StandardScoring";
       Stub.bins = new bool[] { true, true };
       Stub.dispensers = new bool[] { false, true, true, false, false };
-      Stub.maxBins = 5;
+      Stub.maxBins = 1;
 
       return Stub;
     }

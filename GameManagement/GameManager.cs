@@ -99,23 +99,6 @@ namespace SMG.Santas.GameManagement
     }
 
     /// <summary>
-    /// Add an error to the current game.  If Max errors have been reached send the event.
-    /// @TODO This might not be the right home for this method.  Move it all to the Game model?
-    /// </summary>
-    public void AddError()
-    {
-      // @TODO figure out how to send back a cancel.  Exception?
-      _EventBus.Publish(new ErrorAddedEvent());
-
-      CurrentGame.AddError();
-
-      if (CurrentGame.AtMaxErrors()) {
-        // @TODO This should probably live in the Game itself
-        _EventBus.Publish(new MaxErrorsEvent());
-      }
-    }
-
-    /// <summary>
     /// Load a game definition and start the game
     /// </summary>
     protected void StartGame(StartSignalEvent StartEvent)
@@ -132,7 +115,7 @@ namespace SMG.Santas.GameManagement
 
       _EventBus.Publish(new GameStartEvent(CurrentGame));
 
-      StartRound();
+      _EventBus.Publish(new RoundStartEvent());
     }
 
     /// <summary>
@@ -145,10 +128,12 @@ namespace SMG.Santas.GameManagement
         return;
       }
 
+      Debug.Log("Before end game event");
       _EventBus.Publish(new GameEndEvent(CurrentGame));
       CurrentGame.gameOn = false;
       DeactivateCurrentControlSet();
 
+      Debug.Log("after game end event");
       _EventBus.Publish(new GameEndAfterEvent(CurrentGame));
     }
 
@@ -175,6 +160,23 @@ namespace SMG.Santas.GameManagement
 
 
     /// <summary>
+    /// Add an error to the current game.  If Max errors have been reached send the event.
+    /// @TODO This might not be the right home for this method.  Move it all to the Game model?
+    /// </summary>
+    public void AddError()
+    {
+      // @TODO figure out how to send back a cancel.  Exception?
+      _EventBus.Publish(new ErrorAddedEvent());
+
+      CurrentGame.AddError();
+
+      if (CurrentGame.AtMaxErrors()) {
+        // @TODO This should probably live in the Game itself
+        _EventBus.Publish(new MaxErrorsEvent());
+      }
+    }
+
+    /// <summary>
     /// If a ControlSet has been activated, deactivate it safely
     /// </summary>
     protected void DeactivateCurrentControlSet()
@@ -184,23 +186,6 @@ namespace SMG.Santas.GameManagement
         CurrentControlSet = null;
       }
     }
-
-    /// <summary>
-    /// Start a round
-    /// @TODO put in some checks to make sure we are not re-starting a round?
-    /// </summary>
-    protected void StartRound()
-    {
-      if (!GameState()) {
-        Debug.LogWarning("Attempting to Start a round on an inactive game");
-        return;
-      }
-
-      CurrentGame.AdvanceRound();
-
-      _EventBus.Publish(new RoundStartEvent(CurrentRound));
-    }
-
 
     /// <summary>
     /// Load a game definition from a resources json file

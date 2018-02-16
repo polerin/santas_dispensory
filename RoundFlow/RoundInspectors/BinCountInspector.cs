@@ -47,6 +47,7 @@ namespace SMG.Santas.RoundFlow
 
     public override void Deactivate()
     {
+      Debug.Log("Deactivating BinCountInspector");
       _EventBus.Unsubscribe<ScoreBinEvent>(HandleScoreBinEvent);
     }
 

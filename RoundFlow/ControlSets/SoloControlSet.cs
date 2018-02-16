@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GameEventBus.Interfaces;
 
 using SMG.Santas.ObjectScripts;
+using SMG.Santas.Coordination.Events;
 
 namespace SMG.Santas.RoundFlow
 {
@@ -37,9 +38,9 @@ namespace SMG.Santas.RoundFlow
       : base(EventBus)
     {
       _Settings = Settings;
-      TokenSource = new CancellationTokenSource();
       Random = new System.Random();
       ItemTypes = Enum.GetValues(typeof(CatchTypes));
+
     }
     
     public void Dispose()
@@ -60,12 +61,43 @@ namespace SMG.Santas.RoundFlow
       }
 
       isActive = true;
-      StartDispensing(_Settings.dispenseDelay, TokenSource.Token);
+      _EventBus.Subscribe<RoundCountdownEndEvent>(Engage);
+      _EventBus.Subscribe<RoundSuccessEvent>(Disengage);
     }
 
     public override void Deactivate()
     {
+      StopDispensing();
       isActive = false;
+    }
+
+
+    protected async void Engage(IEvent Event)
+    {
+      if(!isActive) {
+        Debug.LogWarning("Attempting to Engage SoloControlSet when it is not active");
+        return;
+      }
+
+      // Refresh token source. 
+      DestroyTokenSource();
+      TokenSource = new CancellationTokenSource();
+
+      await StartDispensing(_Settings.dispenseDelay, TokenSource.Token);
+    }
+
+
+    /// <summary>
+    /// Event handler 
+    /// </summary>
+    /// <param name="Event"></param>
+    protected void Disengage(IEvent Event)
+    {
+      StopDispensing();
+    }
+
+    protected void StopDispensing()
+    {
       TokenSource.Cancel();
     }
 
@@ -73,14 +105,14 @@ namespace SMG.Santas.RoundFlow
     /// This method await loops until canceled, dispensing a random Catchable. 
     /// </summary>
     /// <param name="dispenseDelay"></param>
-    protected async void StartDispensing(int dispenseDelay, CancellationToken CancelMe)
+    protected async Task StartDispensing(int dispenseDelay, CancellationToken CancelMe)
     {
       try {
         while (!CancelMe.IsCancellationRequested) {
           DispenseRandom();
           await Task.Delay(dispenseDelay, CancelMe);
         }
-      } catch (AggregateException ae) {
+      } catch (TaskCanceledException TC) {
         //ignoring, we know it'll be canceled at some point.
         Debug.Log("SoloControlSet dispense stopped.");
       }
@@ -96,6 +128,7 @@ namespace SMG.Santas.RoundFlow
       if (TokenSource == null) {
         return;
       }
+
       Debug.Log("Destroying Token Source");
       TokenSource.Cancel();
       TokenSource.Dispose();

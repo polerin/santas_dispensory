@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Threading.Tasks;
+using System.Collections.Generic;
 using UnityEngine;
 using GameEventBus.Interfaces;
 
@@ -104,9 +105,11 @@ namespace SMG.Santas.RoundFlow
       _Settings = Settings;
 
       _EventBus.Subscribe<RoundStartEvent>(StartRound);
-      _EventBus.Subscribe<GameEndEvent>(EndRound);
-      _EventBus.Subscribe<RoundEndEvent>(EndRound);
+      _EventBus.Subscribe<RoundSuccessEvent>(RoundSuccess);
       _EventBus.Subscribe<DispenseEvent>(DispenseItem);
+
+      // GameEndEvent used as it is before the game is marked as done
+      _EventBus.Subscribe<GameEndEvent>(EndRound);
 
       for (int i = 0; i < RoundInspectors.Count; i++) {
         RoundInspectors[i].Inspect(this);
@@ -129,7 +132,6 @@ namespace SMG.Santas.RoundFlow
 
       _EventBus.Unsubscribe<RoundStartEvent>(StartRound);
       _EventBus.Unsubscribe<GameEndEvent>(EndRound);
-      _EventBus.Unsubscribe<RoundEndEvent>(EndRound);
       _EventBus.Unsubscribe<DispenseEvent>(DispenseItem);
     }
 
@@ -156,37 +158,42 @@ namespace SMG.Santas.RoundFlow
       }
     }
 
-    
+
     /// <summary>
-    /// Load up the right round inspector, activate the appropriate bins and dispensers.
-    /// @TODO when I have event params figured out, use the passed round definition.
+    /// Load up the right round inspector and , activate the appropriate bins and dispensers.
     /// </summary>
-    protected void StartRound(RoundStartEvent StartEvent)
+    protected async void StartRound(RoundStartEvent StartEvent)
     {
       if (!_GameManager.GameState()) {
         Debug.LogWarning("Attempting to start a round for a game that is not started");
         return;
       }
-      RoundDefinition CurrentRound = StartEvent.Round;
+
+      await StartRoundDelay();
+    }
+
+    protected async Task StartRoundDelay()
+    {
+      _GameManager.CurrentGame.AdvanceRound();
+      _EventBus.Publish(new RoundCountdownStartEvent());
+
+      Debug.Log("before Await");
+      await Task.Delay(_Settings.roundStartDelay);
+      Debug.Log("after await");
+
+      // Check to make sure the game hasn't changed in the rest time
+      if (!_GameManager.GameState()) {
+        Debug.Log("Game ended after the round start timer was started");
+        return;
+      }
+
+      _EventBus.Publish(new RoundCountdownEndEvent());
 
       ResetBins(CurrentRound);
       ActivateDispensers(CurrentRound);
 
       SetRoundInspector(CurrentRound);
       SetScoringStrategy(CurrentRound);
-    }
-
-    /// <summary>
-    /// End the current round, deactivating bins and dispensers.
-    /// </summary>
-    protected void EndRound(IEvent Event)
-    {
-      if (!_GameManager.GameState()) {
-        return;
-      }
-
-      DeactivateBins();
-      DeactivateDispensers();
     }
 
     /// <summary>
@@ -252,6 +259,39 @@ namespace SMG.Santas.RoundFlow
     }
 
     /// <summary>
+    /// Round Inspector detected a successful completion of a round
+    /// </summary>
+    /// <param name="SuccessEvent"></param>
+    protected void RoundSuccess(RoundSuccessEvent SuccessEvent)
+    {
+      EndRound();
+      _EventBus.Publish(new RoundStartEvent());
+    }
+
+    /// <summary>
+    /// Overload for game end and others
+    /// </summary>
+    /// <param name="Event"></param>
+    protected void EndRound(IEvent Event)
+    {
+      EndRound();
+    }
+
+    /// <summary>
+    /// End the current round, deactivating bins and dispensers.
+    /// </summary>
+    protected void EndRound()
+    {
+      if (!_GameManager.GameState()) {
+        return;
+      }
+
+      CurrentRoundInspector.Deactivate();
+      DeactivateBins();
+      DeactivateDispensers();
+    }
+
+    /// <summary>
     /// Deactivate all registered bins
     /// </summary>
     public void DeactivateBins()
@@ -283,10 +323,7 @@ namespace SMG.Santas.RoundFlow
       _GameManager.CurrentGame.AddScore(ScoreResult);
       _GameManager.CurrentGame.AddBin();
 
-      Debug.Log("Score result:");
-      Debug.Log(ScoreResult);
       if (!ScoreResult.scoreSuccessful) {
-        Debug.Log("Not successful!");
         _GameManager.AddError();
       }
 
@@ -338,6 +375,9 @@ namespace SMG.Santas.RoundFlow
     [System.Serializable]
     public class Settings
     {
+      [Tooltip("The amount of time to rest before the round starts")]
+      public int roundStartDelay = 3000;
+
       // @TODO Booo hardcode but whatever.
       public GameObject BearPrefab;
       public GameObject BallPrefab;
