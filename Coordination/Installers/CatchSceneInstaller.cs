@@ -33,7 +33,6 @@ namespace SMG.Santas.Coordination
 
     public override void InstallBindings()
     {
-
       // PresentLists are required for each active Collector, and should not be
       // shared across the collectors
       Container.Bind<PresentList>().AsTransient();

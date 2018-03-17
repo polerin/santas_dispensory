@@ -177,9 +177,7 @@ namespace SMG.Santas.RoundFlow
       _GameManager.CurrentGame.AdvanceRound();
       _EventBus.Publish(new RoundCountdownStartEvent());
 
-      Debug.Log("before Await");
       await Task.Delay(_Settings.roundStartDelay);
-      Debug.Log("after await");
 
       // Check to make sure the game hasn't changed in the rest time
       if (!_GameManager.GameState()) {
